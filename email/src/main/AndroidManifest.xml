@@ -53,6 +53,13 @@
 
         <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
 
+        <!-- Shows the Android 13+ notification permission prompt when the
+             site asks for it. Without it the request fails and nothing is
+             ever delivered. -->
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity"
+            android:exported="false" />
+
         <!-- Lets Chrome hand the site's Web Push notifications to the app, so
              they show up under "Inbox" rather than under Chrome. -->
         <service
