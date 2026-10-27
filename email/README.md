@@ -26,6 +26,10 @@ app/src/main/java/gay/doughmination/mail/
   and its PKCE verifier for a session token, sent as `Authorization: Bearer`.
 - **Email HTML** renders in a WebView with JavaScript off. Links open in the
   browser, and remote content is blocked until you tap "Load remote images".
+- **Notifications**: when Resend's webhook delivers mail, the Worker sends a
+  Firebase Cloud Messaging data message to each signed-in install, and
+  `Push.kt` shows it; a tap opens the thread. The app registers its FCM token
+  after sign-in and removes it on sign-out.
 - **Admin** stays on the web; the drawer links to it.
 - Links to `mail.doughmination.gay/inbox/...` open in the app, which needs the
   site's `/.well-known/assetlinks.json` to list this app's signing key.
@@ -43,6 +47,10 @@ echo "sdk.dir=/opt/android-sdk" > local.properties
 
 `-PinboxUrl=http://10.0.2.2:5173` points a build at `npm run dev` from the
 emulator. Signing in locally needs `/auth/*` to reach that server too.
+
+Notifications need Firebase: put the project's `google-services.json` at
+`app/google-services.json` (next to `app/build.gradle.kts`). Without it the app
+still builds, with notifications off and Settings saying so.
 
 Signing reads `keystore.properties` (gitignored):
 
@@ -66,3 +74,5 @@ release of its own. It signs with two repository secrets:
 
 - `KEYSTORE_BASE64`: `base64 -w0 inbox.jks`
 - `KEYSTORE_PASSWORD`: the keystore password
+- `GOOGLE_SERVICES_JSON` (optional): `base64 -w0 google-services.json`, if you'd
+  rather not commit the file
