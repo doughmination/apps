@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import gay.doughmination.mail.InboxApp
+import gay.doughmination.mail.Push
 import gay.doughmination.mail.data.ApiException
 import gay.doughmination.mail.data.AttachmentInfo
 import gay.doughmination.mail.data.ListFolder
@@ -161,6 +162,7 @@ class MailViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun signOut() = viewModelScope.launch {
+        Push.unregister(inbox)
         api.logout()
         inbox.setSignedIn(false)
     }
@@ -185,6 +187,7 @@ class MailViewModel(application: Application) : AndroidViewModel(application) {
             fail(e)
         }
         reload()
+        Push.register(inbox)
     }
 
     private suspend fun refreshUnread() {
@@ -597,6 +600,15 @@ class MailViewModel(application: Application) : AndroidViewModel(application) {
             api.setName(name.trim())
             me = me?.copy(name = name.trim().ifEmpty { null })
             say("Saved")
+        } catch (e: Exception) {
+            fail(e)
+        }
+    }
+
+    fun testPush() = viewModelScope.launch {
+        try {
+            val n = api.pushTest()
+            say(if (n == 0) "No devices have notifications on yet." else "Sent to $n device(s).")
         } catch (e: Exception) {
             fail(e)
         }

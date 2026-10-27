@@ -1,6 +1,8 @@
 package gay.doughmination.mail.ui
 
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import gay.doughmination.mail.BuildConfig
+import gay.doughmination.mail.Push
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +89,31 @@ fun SettingsScreen(vm: MailViewModel) {
                 Spacer(Modifier.height(4.dp))
                 for (addr in me?.addresses.orEmpty()) Text(addr, color = Muted)
                 if (me?.addresses.isNullOrEmpty()) Text("None yet. Ask an admin to switch on a domain.", color = Muted)
+            }
+            HorizontalDivider()
+            if (Push.available(context)) {
+                ListItem(
+                    headlineContent = { Text("Notification settings") },
+                    supportingContent = { Text("Turn new-mail notifications on or off") },
+                    leadingContent = { Icon(Icons.Outlined.Notifications, null) },
+                    modifier = Modifier.clickable {
+                        context.startActivity(
+                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName),
+                        )
+                    },
+                )
+                ListItem(
+                    headlineContent = { Text("Send a test notification") },
+                    leadingContent = { Icon(Icons.Outlined.NotificationsActive, null) },
+                    modifier = Modifier.clickable { vm.testPush() },
+                )
+            } else {
+                ListItem(
+                    headlineContent = { Text("Notifications") },
+                    supportingContent = { Text("This build has no Firebase setup, so notifications are off.") },
+                    leadingContent = { Icon(Icons.Outlined.NotificationsOff, null) },
+                )
             }
             HorizontalDivider()
             ListItem(

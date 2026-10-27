@@ -7,6 +7,11 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
+// Firebase (notifications) is switched on by dropping the project's
+// google-services.json next to this file. Without it the app builds and runs,
+// just without notifications.
+if (file("google-services.json").exists()) apply(plugin = "com.google.gms.google-services")
+
 // Signing details live in keystore.properties (not committed). Without it the
 // release build is left unsigned.
 val keystoreProps = Properties().apply {
@@ -80,6 +85,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-process:2.8.7")
     implementation("androidx.browser:browser:1.8.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")

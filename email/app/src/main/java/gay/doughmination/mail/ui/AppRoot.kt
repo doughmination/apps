@@ -1,6 +1,13 @@
 package gay.doughmination.mail.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import gay.doughmination.mail.Push
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -59,6 +66,7 @@ fun AppRoot(vm: MailViewModel) {
                 LoginScreen(vm)
                 return@Surface
             }
+            AskForNotifications()
             BackHandler(enabled = vm.stack.size > 1) { vm.back() }
             AnimatedContent(
                 targetState = vm.screen,
@@ -73,6 +81,20 @@ fun AppRoot(vm: MailViewModel) {
                 }
             }
         }
+    }
+}
+
+/** Android 13+ needs permission before any notification shows; asked once signed in. */
+@Composable
+private fun AskForNotifications() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+    val context = LocalContext.current
+    if (!Push.available(context)) return
+    val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    LaunchedEffect(Unit) {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (!granted) ask.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 }
 

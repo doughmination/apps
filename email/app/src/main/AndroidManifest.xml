@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Custom Tabs for signing in: lets us find a browser that supports them. -->
     <queries>
@@ -50,5 +51,14 @@
                 <data android:pathPrefix="/bin" />
             </intent-filter>
         </activity>
+
+        <!-- New-mail notifications from the Worker, through Firebase. -->
+        <service
+            android:name=".PushService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

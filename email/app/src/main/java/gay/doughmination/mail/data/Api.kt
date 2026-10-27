@@ -93,6 +93,8 @@ class Api(val baseUrl: String, private val tokens: TokenStore, private val onSig
     @Serializable private data class Read(val read: Boolean)
     @Serializable private data class Star(val starred: Boolean)
     @Serializable private data class Name(val name: String)
+    @Serializable data class PushResult(val sent: Int, val pruned: Int = 0)
+    @Serializable private data class FcmToken(val token: String)
     @Serializable private data class CodeSwap(val code: String, val verifier: String)
     @Serializable private data class Token(val token: String)
 
@@ -126,6 +128,11 @@ class Api(val baseUrl: String, private val tokens: TokenStore, private val onSig
     suspend fun createDraft(input: SendRequest): String = call<Id, SendRequest>("POST", "/api/drafts", input).id
     suspend fun updateDraft(id: String, input: SendRequest): String = call<Id, SendRequest>("PUT", "/api/drafts/$id", input).id
     suspend fun send(input: SendRequest): Sent = call("POST", "/api/send", input)
+
+    suspend fun registerFcm(token: String) { call<JsonObject, FcmToken>("POST", "/api/push/fcm", FcmToken(token)) }
+    suspend fun unregisterFcm(token: String) { call<JsonObject, FcmToken>("POST", "/api/push/fcm/unregister", FcmToken(token)) }
+    /** Sends a test notification to every device; returns how many it reached. */
+    suspend fun pushTest(): Int = call<PushResult>("POST", "/api/push/test").sent
 
     fun attachmentUrl(id: String, inline: Boolean = false): String =
         "$baseUrl/api/attachments/$id${if (inline) "?inline=1" else ""}"
