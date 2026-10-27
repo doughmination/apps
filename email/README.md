@@ -1,6 +1,6 @@
 # Inbox for Android
 
-An Android app for [Inbox](https://github.com/doughmination/email). It's a
+An Android app for [Inbox](../email). It's a
 [Trusted Web Activity](https://developer.chrome.com/docs/android/trusted-web-activity):
 the live site at https://mail.doughmination.gay, shown full-screen in Chrome,
 with its Web Push notifications delivered as the app's own.
@@ -33,7 +33,7 @@ changing too.
 
 ## CI
 
-`.github/workflows/build.yml` builds on every push and uploads `inbox.apk` as
+`.github/workflows/android.yml` (at the repo root) builds on every push and uploads `inbox.apk` as
 an artifact. Each build from `main` replaces the rolling `latest` release, so
 the newest APK is always at
 https://github.com/doughmination/email-app/releases/download/latest/inbox.apk.
