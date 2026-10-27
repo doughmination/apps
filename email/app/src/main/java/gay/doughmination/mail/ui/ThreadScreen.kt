@@ -151,7 +151,7 @@ private fun MessageCard(vm: MailViewModel, m: Message, bin: Boolean, startOpen: 
     val isDraft = m.folder == "drafts"
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(containerColor = Raised),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.clickable { open = !open }.padding(14.dp)) {

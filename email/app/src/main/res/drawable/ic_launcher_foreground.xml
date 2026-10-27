@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The envelope from email/public/icon.svg, 46dp wide so it stays inside the
+     72dp a launcher's mask always shows. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M36.48,38.12h35.04a5.48,5.48 0 0 1 5.48,5.48v20.8a5.48,5.48 0 0 1 -5.48,5.48h-35.04a5.48,5.48 0 0 1 -5.48,-5.48v-20.8a5.48,5.48 0 0 1 5.48,-5.48z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="38.12"
+                android:endX="0"
+                android:endY="69.88"
+                android:startColor="#FFF45FAE"
+                android:endColor="#FFD42F86" />
+        </aapt:attr>
+    </path>
+    <path
+        android:pathData="M35.38,43.6L54,57.83L72.62,43.6"
+        android:strokeColor="#FFFFF1F8"
+        android:strokeWidth="4.1"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

@@ -295,7 +295,8 @@ private fun SwipeRow(vm: MailViewModel, t: ThreadSummary, onHold: (ThreadSummary
             }
         },
     ) {
-        ThreadRow(vm, t, onClick = { vm.open(t) }, onLongClick = {
+        val moving = state.dismissDirection != SwipeToDismissBoxValue.Settled
+        ThreadRow(vm, t, opaque = moving, onClick = { vm.open(t) }, onLongClick = {
             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             onHold(t)
         })
@@ -304,7 +305,7 @@ private fun SwipeRow(vm: MailViewModel, t: ThreadSummary, onHold: (ThreadSummary
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ThreadRow(vm: MailViewModel, t: ThreadSummary, onClick: () -> Unit, onLongClick: () -> Unit) {
+private fun ThreadRow(vm: MailViewModel, t: ThreadSummary, opaque: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
     val unread = t.unread > 0
     // The Bin and Starred mix folders; whoever it's from reads best there.
     val who = when (vm.folder) {
@@ -315,7 +316,8 @@ private fun ThreadRow(vm: MailViewModel, t: ThreadSummary, onClick: () -> Unit, 
     Row(
         Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
+            // Opaque only while it's being swiped, so the wallpaper shows through at rest.
+            .background(if (opaque) Bg else Color.Transparent)
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top,
