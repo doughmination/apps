@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- res/xml/filepaths.xml
-     Where the launcher drops the splash image for Chrome to pick up. -->
-<paths>
-    <files-path
-        name="twa_splash"
-        path="twa_splash/" />
-</paths>

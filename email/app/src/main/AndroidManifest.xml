@@ -1,105 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A Trusted Web Activity: the app is the live site at launch_url, shown
-     full-screen in Chrome once assetlinks.json on the site matches our key. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- So LauncherActivity can tell whether Chrome is installed. -->
+    <!-- Custom Tabs for signing in: lets us find a browser that supports them. -->
     <queries>
-        <package android:name="com.android.chrome" />
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
     </queries>
 
     <application
-        android:allowBackup="true"
+        android:name=".InboxApp"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Translucent.NoTitleBar">
-
-        <meta-data
-            android:name="asset_statements"
-            android:resource="@string/asset_statements" />
+        android:theme="@style/Theme.Inbox">
 
         <activity
-            android:name=".LauncherActivity"
+            android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name">
-            <meta-data
-                android:name="android.support.customtabs.trusted.DEFAULT_URL"
-                android:value="@string/launch_url" />
-            <meta-data
-                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
-                android:resource="@color/background" />
-            <meta-data
-                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
-                android:resource="@color/background" />
-            <meta-data
-                android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
-                android:value="customtabs" />
-
-            <!-- Splash: the icon on the app background until the page first
-                 paints. The site's own splash starts on this exact frame
-                 (128dp, centred) and animates from there. -->
-            <meta-data
-                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
-                android:resource="@drawable/splash" />
-            <meta-data
-                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
-                android:resource="@color/background" />
-            <meta-data
-                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
-                android:value="200" />
-            <meta-data
-                android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
-                android:value="gay.doughmination.mail.fileprovider" />
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Open mail.doughmination.gay links in the app. -->
+            <!-- Where the server sends the browser tab after SSO sign-in. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="gay.doughmination.mail" android:host="auth" />
+            </intent-filter>
+
+            <!-- Links to mail open in the app. Only these paths: claiming
+                 /auth would pull the sign-in redirect out of the browser tab. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="mail.doughmination.gay" />
+                <data android:pathPrefix="/inbox" />
+                <data android:pathPrefix="/starred" />
+                <data android:pathPrefix="/sent" />
+                <data android:pathPrefix="/drafts" />
+                <data android:pathPrefix="/bin" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
-
-        <!-- Hands the splash image to Chrome. -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="gay.doughmination.mail.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/filepaths" />
-        </provider>
-
-        <!-- Shows the Android 13+ notification permission prompt when the
-             site asks for it. Without it the request fails and nothing is
-             ever delivered. -->
-        <activity
-            android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity"
-            android:exported="false" />
-
-        <!-- Lets Chrome hand the site's Web Push notifications to the app, so
-             they show up under "Inbox" rather than under Chrome. -->
-        <service
-            android:name="com.google.androidbrowserhelper.trusted.DelegationService"
-            android:enabled="true"
-            android:exported="true">
-            <meta-data
-                android:name="android.support.customtabs.trusted.SMALL_ICON"
-                android:resource="@drawable/ic_notification" />
-            <intent-filter>
-                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </service>
     </application>
 </manifest>
