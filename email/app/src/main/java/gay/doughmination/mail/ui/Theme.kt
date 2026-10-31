@@ -12,9 +12,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import gay.doughmination.mail.R
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 // The site's palette (email/src/web/app.css).
 val Accent = Color(0xFFEB459E)
@@ -23,6 +29,49 @@ val Muted = Color(0xFFA49EAB)
 val Bg = Color(0xFF0B0A0D)
 /** A card on the backdrop, like --raised on the web. */
 val Raised = Color.White.copy(alpha = 0.05f)
+/** Hairline borders, like --line on the web. */
+val Line = Color.White.copy(alpha = 0.09f)
+/** A starred thread, like --star on the web. */
+val StarYellow = Color(0xFFF7C948)
+
+/** IBM Plex Sans, as on the web and doughmination.gay (the same files, as TTF). */
+val PlexSans = FontFamily(
+    Font(R.font.ibm_plex_sans_regular, FontWeight.Normal),
+    Font(R.font.ibm_plex_sans_medium, FontWeight.Medium),
+    Font(R.font.ibm_plex_sans_semibold, FontWeight.SemiBold),
+    Font(R.font.ibm_plex_sans_bold, FontWeight.Bold),
+)
+
+private fun TextStyle.plex() = copy(fontFamily = PlexSans)
+
+private val typography = Typography().run {
+    Typography(
+        displayLarge = displayLarge.plex(),
+        displayMedium = displayMedium.plex(),
+        displaySmall = displaySmall.plex(),
+        headlineLarge = headlineLarge.plex(),
+        headlineMedium = headlineMedium.plex(),
+        headlineSmall = headlineSmall.plex(),
+        titleLarge = titleLarge.plex(),
+        titleMedium = titleMedium.plex(),
+        titleSmall = titleSmall.plex(),
+        bodyLarge = bodyLarge.plex(),
+        bodyMedium = bodyMedium.plex(),
+        bodySmall = bodySmall.plex(),
+        labelLarge = labelLarge.plex(),
+        labelMedium = labelMedium.plex(),
+        labelSmall = labelSmall.plex(),
+    )
+}
+
+/** The web's small uppercase accent label (.eyebrow), used for headings. */
+val Eyebrow = TextStyle(
+    fontFamily = PlexSans,
+    fontSize = 11.sp,
+    fontWeight = FontWeight.SemiBold,
+    letterSpacing = 1.5.sp,
+    color = Accent,
+)
 
 private val colors = darkColorScheme(
     primary = Accent,
@@ -87,4 +136,5 @@ fun Backdrop(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun InboxTheme(content: @Composable () -> Unit) = MaterialTheme(colorScheme = colors, content = content)
+fun InboxTheme(content: @Composable () -> Unit) =
+    MaterialTheme(colorScheme = colors, typography = typography, content = content)

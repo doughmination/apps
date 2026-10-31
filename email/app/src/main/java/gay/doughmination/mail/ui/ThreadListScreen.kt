@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -89,6 +90,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.browser.customtabs.CustomTabsIntent
 import android.net.Uri
 import gay.doughmination.mail.data.ListFolder
@@ -308,40 +310,53 @@ private fun SwipeRow(vm: MailViewModel, t: ThreadSummary, onHold: (ThreadSummary
 private fun ThreadRow(vm: MailViewModel, t: ThreadSummary, opaque: Boolean, onClick: () -> Unit, onLongClick: () -> Unit) {
     val unread = t.unread > 0
     // The Bin and Starred mix folders; whoever it's from reads best there.
-    val who = when (vm.folder) {
-        ListFolder.Sent, ListFolder.Drafts ->
-            "To: " + (t.to.joinToString(", ") { displayName(it) }.ifEmpty { "(nobody yet)" })
-        else -> displayName(t.from)
-    }
+    val fromSide = vm.folder != ListFolder.Sent && vm.folder != ListFolder.Drafts
+    val who = if (fromSide) displayName(t.from)
+    else "To: " + (t.to.joinToString(", ") { displayName(it) }.ifEmpty { "(nobody yet)" })
+    // Laid out like the web's rows on a phone, sizes and all.
     Row(
         Modifier
             .fillMaxWidth()
             // Opaque only while it's being swiped, so the wallpaper shows through at rest.
             .background(if (opaque) Bg else Color.Transparent)
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        Avatar(who.removePrefix("To: "))
-        Spacer(Modifier.width(12.dp))
+        Avatar(if (fromSide) displayName(t.from) else displayName(t.to.firstOrNull() ?: "?"))
+        Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    who + if (t.count > 1) "  ${t.count}" else "",
-                    Modifier.weight(1f),
+                    who,
+                    Modifier.weight(1f, fill = false),
+                    fontSize = 15.sp,
                     fontWeight = if (unread) FontWeight.Bold else FontWeight.Normal,
+                    color = if (unread) MaterialTheme.colorScheme.onSurface else Muted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                if (t.count > 1) {
+                    Spacer(Modifier.width(6.dp))
+                    Text("${t.count}", fontSize = 12.sp, color = Muted)
+                }
+                if (t.hasAttachments) {
+                    Spacer(Modifier.width(6.dp))
+                    Icon(Icons.Outlined.AttachFile, "Has attachments", Modifier.size(14.dp), tint = Muted)
+                }
+                Spacer(Modifier.weight(1f).widthIn(min = 8.dp))
                 Text(
                     fmtTime(t.lastAt),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (unread) Accent else Muted,
+                    fontSize = 12.sp,
+                    fontWeight = if (unread) FontWeight.Bold else FontWeight.Normal,
+                    color = if (unread) MaterialTheme.colorScheme.onSurface else Muted,
                 )
             }
             Text(
                 t.subject.ifEmpty { "(no subject)" },
-                fontWeight = if (unread) FontWeight.SemiBold else FontWeight.Normal,
+                Modifier.padding(end = 8.dp),
+                fontSize = 14.sp,
+                fontWeight = if (unread) FontWeight.Bold else FontWeight.Normal,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -349,30 +364,39 @@ private fun ThreadRow(vm: MailViewModel, t: ThreadSummary, opaque: Boolean, onCl
                 Text(
                     t.snippet,
                     Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 13.5.sp,
                     color = Muted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (t.hasAttachments) Icon(Icons.Outlined.AttachFile, "Has attachments", Modifier.size(16.dp), tint = Muted)
-                if (t.starred) Icon(Icons.Filled.Star, "Starred", Modifier.size(16.dp), tint = Accent)
+                // A star on every row, as on the web; the Bin has none.
+                if (vm.folder != ListFolder.Bin) {
+                    IconButton(onClick = { vm.toggleStar(t.id, !t.starred) }, Modifier.size(32.dp)) {
+                        if (t.starred) Icon(Icons.Filled.Star, "Unstar", Modifier.size(18.dp), tint = StarYellow)
+                        else Icon(Icons.Outlined.StarOutline, "Star", Modifier.size(18.dp), tint = Muted)
+                    }
+                }
             }
         }
     }
 }
 
-private val avatarColors = listOf(
-    Color(0xFFEB459E), Color(0xFF7C5CFF), Color(0xFF2FA4FF), Color(0xFF1FB58F),
-    Color(0xFFF5A524), Color(0xFFFF6B5C), Color(0xFFB45CFF), Color(0xFF4CC3D9),
-)
-
-/** A coloured initial, as Gmail does. */
+/** A coloured initial, as the web draws it: the same hue from the same name. */
 @Composable
 private fun Avatar(name: String) {
     val initial = name.trim().firstOrNull { it.isLetterOrDigit() }?.uppercaseChar() ?: '?'
-    val color = avatarColors[Math.floorMod(name.lowercase().hashCode(), avatarColors.size)]
-    Box(Modifier.size(40.dp).clip(CircleShape).background(color), contentAlignment = Alignment.Center) {
-        Text(initial.toString(), color = Color.White, fontWeight = FontWeight.Bold)
+    // The web's hash runs over code points, taking each one's first UTF-16 unit.
+    var hue = 0
+    var i = 0
+    while (i < name.length) {
+        hue = (hue * 31 + name[i].code) % 360
+        i += Character.charCount(name.codePointAt(i))
+    }
+    Box(
+        Modifier.padding(top = 2.dp).size(40.dp).clip(CircleShape).background(Color.hsl(hue.toFloat(), 0.55f, 0.42f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(initial.toString(), color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 

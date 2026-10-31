@@ -92,7 +92,7 @@ fun ThreadScreen(vm: MailViewModel, screen: Screen.Thread) {
                         }
                     } else {
                         IconButton(onClick = { vm.toggleStar(thread.id, !thread.starred) }) {
-                            if (thread.starred) Icon(Icons.Filled.Star, "Unstar", tint = Accent)
+                            if (thread.starred) Icon(Icons.Filled.Star, "Unstar", tint = StarYellow)
                             else Icon(Icons.Outlined.StarOutline, "Star")
                         }
                         if (thread.messages.any { it.folder == "inbox" }) {

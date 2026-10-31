@@ -4,30 +4,36 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.NotificationsActive
-import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -38,13 +44,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import gay.doughmination.mail.BuildConfig
 import gay.doughmination.mail.Push
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Laid out like the web's settings page: one card per topic, under a small pink heading. */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(vm: MailViewModel) {
     val me = vm.me
@@ -65,80 +75,109 @@ fun SettingsScreen(vm: MailViewModel) {
         },
         snackbarHost = { SnackbarHost(LocalSnackbar.current) },
     ) { padding ->
-        Column(Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState())) {
-            Column(Modifier.padding(16.dp)) {
-                Text("Your name", style = MaterialTheme.typography.titleMedium)
-                Text(
-                    "Shown on mail you send. Leave it empty to send from the bare address.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Muted,
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { if (it.length <= 100) name = it },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(8.dp))
-                Button(onClick = { vm.saveName(name) }, enabled = name.trim() != me?.name.orEmpty()) { Text("Save") }
+        Column(
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Section("Your name") {
+                Note("People see this as the sender of mail you send. Leave it empty to send from just the address.")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { if (it.length <= 100) name = it },
+                        placeholder = { Text("Your name") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Button(onClick = { vm.saveName(name) }, enabled = name.trim() != me?.name.orEmpty()) { Text("Save") }
+                }
             }
-            HorizontalDivider()
-            Column(Modifier.padding(16.dp)) {
-                Text("Your addresses", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(4.dp))
-                for (addr in me?.addresses.orEmpty()) Text(addr, color = Muted)
-                if (me?.addresses.isNullOrEmpty()) Text("None yet. Ask an admin to switch on a domain.", color = Muted)
+
+            Section("Your addresses") {
+                Note("You receive and can send from each of these.")
+                for (addr in me?.addresses.orEmpty()) Text("•  $addr")
+                if (me?.addresses.isNullOrEmpty()) Text("None yet. Ask an admin to switch on a domain.")
             }
-            HorizontalDivider()
-            if (Push.available(context)) {
-                ListItem(
-                    headlineContent = { Text("Notification settings") },
-                    supportingContent = { Text("Turn new-mail notifications on or off") },
-                    leadingContent = { Icon(Icons.Outlined.Notifications, null) },
-                    modifier = Modifier.clickable {
-                        context.startActivity(
-                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName),
-                        )
-                    },
-                )
-                ListItem(
-                    headlineContent = { Text("Send a test notification") },
-                    leadingContent = { Icon(Icons.Outlined.NotificationsActive, null) },
-                    modifier = Modifier.clickable { vm.testPush() },
-                )
-            } else {
-                ListItem(
-                    headlineContent = { Text("Notifications") },
-                    supportingContent = { Text("This build has no Firebase setup, so notifications are off.") },
-                    leadingContent = { Icon(Icons.Outlined.NotificationsOff, null) },
-                )
+
+            Section("Notifications", Icons.Outlined.Notifications) {
+                if (Push.available(context)) {
+                    Note("Turn new-mail notifications on or off in Android's settings for the app.")
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = {
+                            context.startActivity(
+                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName),
+                            )
+                        }) { Text("Notification settings") }
+                        OutlinedButton(onClick = vm::testPush) { Text("Send a test") }
+                    }
+                } else {
+                    Note("This build has no Firebase setup, so notifications are off.")
+                }
             }
-            HorizontalDivider()
-            ListItem(
-                headlineContent = { Text("Privacy policy") },
-                leadingContent = { Icon(Icons.Outlined.PrivacyTip, null) },
-                modifier = Modifier.clickable { openWeb("/privacy") },
-            )
-            ListItem(
-                headlineContent = { Text("Terms of service") },
-                leadingContent = { Icon(Icons.Outlined.Description, null) },
-                modifier = Modifier.clickable { openWeb("/terms") },
-            )
-            HorizontalDivider()
-            ListItem(
-                headlineContent = { Text("Sign out", color = Danger) },
-                supportingContent = { me?.let { Text("Signed in as ${it.username}") } },
-                leadingContent = { Icon(Icons.AutoMirrored.Outlined.Logout, null, tint = Danger) },
-                modifier = Modifier.clickable { vm.signOut() },
-            )
+
+            Section("Privacy and terms", Icons.Outlined.PrivacyTip) {
+                Note("What's stored about you and your mail, who can see it, and the rules for using the inbox.")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { openWeb("/privacy") }) {
+                        Text("Privacy policy")
+                        Icon(Icons.Outlined.ChevronRight, null, Modifier.size(ButtonDefaults.IconSize))
+                    }
+                    OutlinedButton(onClick = { openWeb("/terms") }) {
+                        Text("Terms of service")
+                        Icon(Icons.Outlined.ChevronRight, null, Modifier.size(ButtonDefaults.IconSize))
+                    }
+                }
+            }
+
+            Section("Account") {
+                me?.let { Note("Signed in as ${it.username}.") }
+                OutlinedButton(
+                    onClick = { vm.signOut() },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Danger),
+                    contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+                ) {
+                    Icon(Icons.AutoMirrored.Outlined.Logout, null, Modifier.size(ButtonDefaults.IconSize))
+                    Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                    Text("Sign out")
+                }
+            }
+
             Text(
                 "Inbox ${BuildConfig.VERSION_NAME}",
-                Modifier.padding(16.dp),
+                Modifier.padding(start = 4.dp, bottom = 24.dp),
                 style = MaterialTheme.typography.labelSmall,
                 color = Muted,
             )
         }
     }
 }
+
+private val sectionShape = RoundedCornerShape(16.dp)
+
+/** A card like the web's settings sections: dark glass, a hairline border, an eyebrow heading. */
+@Composable
+private fun Section(title: String, icon: ImageVector? = null, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(sectionShape)
+            .background(Bg.copy(alpha = 0.72f))
+            .border(1.dp, Line, sectionShape)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (icon != null) {
+                Icon(icon, null, Modifier.size(16.dp), tint = Accent)
+                Spacer(Modifier.width(6.dp))
+            }
+            Text(title.uppercase(), style = Eyebrow)
+        }
+        content()
+    }
+}
+
+@Composable
+private fun Note(text: String) = Text(text, style = MaterialTheme.typography.bodyMedium, color = Muted)
