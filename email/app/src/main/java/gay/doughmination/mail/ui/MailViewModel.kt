@@ -61,6 +61,9 @@ class MailViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var signingIn by mutableStateOf(false)
         private set
+    /** False until the first page of mail is in (or failed), so the splash can wait for it. */
+    var ready by mutableStateOf(!inbox.signedIn.value)
+        private set
     var loginError by mutableStateOf<String?>(null)
         private set
 
@@ -169,6 +172,7 @@ class MailViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun signedOutReset() {
         inbox.live.stop()
+        ready = true
         me = null
         unread = emptyMap()
         threads.clear()
@@ -217,10 +221,12 @@ class MailViewModel(application: Application) : AndroidViewModel(application) {
                 threads.addAll(page.items)
                 nextCursor = page.nextCursor
                 listError = null
+                ready = true
                 if (pulled) refreshUnread()
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 if (threads.isEmpty()) listError = "Couldn't load your mail." else fail(e)
+                ready = true
             } finally {
                 loading = false
                 refreshing = false

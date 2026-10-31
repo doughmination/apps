@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The splash (Android 12+): the mascot flies up into the disc with three
+     wingbeats while the envelope drops onto its string. Then, for as long as
+     mail is loading, it hovers and flaps with the envelope swinging below.
+     Times are in ms; the loops start once the opening has finished. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:drawable="@drawable/ic_splash">
+
+    <target android:name="mascot">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:valueFrom="70"
+                    android:valueTo="0"
+                    android:duration="900"
+                    android:interpolator="@interpolator/splash_rise" />
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:startOffset="900"
+                    android:valueFrom="0"
+                    android:valueTo="-14"
+                    android:duration="700"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Three quick beats on the way up, then slower ones while mail loads. -->
+    <target android:name="wing_left">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="rotation"
+                    android:valueFrom="0"
+                    android:valueTo="-24"
+                    android:duration="150"
+                    android:repeatCount="5"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:valueFrom="1"
+                    android:valueTo="0.85"
+                    android:duration="150"
+                    android:repeatCount="5"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+                <objectAnimator
+                    android:propertyName="rotation"
+                    android:startOffset="900"
+                    android:valueFrom="0"
+                    android:valueTo="-24"
+                    android:duration="350"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:startOffset="900"
+                    android:valueFrom="1"
+                    android:valueTo="0.85"
+                    android:duration="350"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Three quick beats on the way up, then slower ones while mail loads. -->
+    <target android:name="wing_right">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="rotation"
+                    android:valueFrom="0"
+                    android:valueTo="24"
+                    android:duration="150"
+                    android:repeatCount="5"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:valueFrom="1"
+                    android:valueTo="0.85"
+                    android:duration="150"
+                    android:repeatCount="5"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+                <objectAnimator
+                    android:propertyName="rotation"
+                    android:startOffset="900"
+                    android:valueFrom="0"
+                    android:valueTo="24"
+                    android:duration="350"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:startOffset="900"
+                    android:valueFrom="1"
+                    android:valueTo="0.85"
+                    android:duration="350"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:interpolator="@android:interpolator/accelerate_decelerate" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <!-- Drops in from above, then swings in time with the hover. -->
+    <target android:name="envelope">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="translateY"
+                    android:startOffset="350"
+                    android:valueFrom="-170"
+                    android:valueTo="0"
+                    android:duration="800"
+                    android:interpolator="@interpolator/splash_drop" />
+                <objectAnimator
+                    android:propertyName="scaleX"
+                    android:startOffset="350"
+                    android:valueFrom="0.6"
+                    android:valueTo="1"
+                    android:duration="800"
+                    android:interpolator="@interpolator/splash_drop" />
+                <objectAnimator
+                    android:propertyName="scaleY"
+                    android:startOffset="350"
+                    android:valueFrom="0.6"
+                    android:valueTo="1"
+                    android:duration="800"
+                    android:interpolator="@interpolator/splash_drop" />
+                <objectAnimator
+                    android:startOffset="1150"
+                    android:duration="1400"
+                    android:repeatCount="infinite">
+                    <propertyValuesHolder android:propertyName="rotation">
+                        <keyframe android:fraction="0" android:value="0" />
+                        <keyframe android:fraction="0.25" android:value="7" />
+                        <keyframe android:fraction="0.75" android:value="-7" />
+                        <keyframe android:fraction="1" android:value="0" />
+                    </propertyValuesHolder>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+
+    <target android:name="envelope_0">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="envelope_1">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="envelope_2">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="envelope_3">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="envelope_4">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+                <objectAnimator
+                    android:propertyName="strokeAlpha"
+                    android:startOffset="350"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:duration="320" />
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>
