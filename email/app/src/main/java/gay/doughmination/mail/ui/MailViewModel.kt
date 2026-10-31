@@ -18,6 +18,7 @@ import gay.doughmination.mail.data.ListFolder
 import gay.doughmination.mail.data.MailThread
 import gay.doughmination.mail.data.Me
 import gay.doughmination.mail.data.Message
+import gay.doughmination.mail.data.Preferences
 import gay.doughmination.mail.data.SendRequest
 import gay.doughmination.mail.data.SignedOutException
 import gay.doughmination.mail.data.ThreadSummary
@@ -607,6 +608,19 @@ class MailViewModel(application: Application) : AndroidViewModel(application) {
             me = me?.copy(name = name.trim().ifEmpty { null })
             say("Saved")
         } catch (e: Exception) {
+            fail(e)
+        }
+    }
+
+    /** Shows the change straight away, and puts it back if the server says no. */
+    fun setPreferences(prefs: Preferences) = viewModelScope.launch {
+        val before = me ?: return@launch
+        me = before.copy(usePicture = prefs.usePicture, swipeLeft = prefs.swipeLeft, swipeRight = prefs.swipeRight)
+        try {
+            val saved = api.setPreferences(prefs)
+            me = me?.copy(usePicture = saved.usePicture, swipeLeft = saved.swipeLeft, swipeRight = saved.swipeRight)
+        } catch (e: Exception) {
+            me = me?.copy(usePicture = before.usePicture, swipeLeft = before.swipeLeft, swipeRight = before.swipeRight)
             fail(e)
         }
     }

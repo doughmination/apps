@@ -29,6 +29,11 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.Switch
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +47,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import gay.doughmination.mail.BuildConfig
 import gay.doughmination.mail.Push
+import gay.doughmination.mail.data.SwipeAction
 
 /** Laid out like the web's settings page: one card per topic, under a small pink heading. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -91,6 +98,38 @@ fun SettingsScreen(vm: MailViewModel) {
                     )
                     Spacer(Modifier.width(8.dp))
                     Button(onClick = { vm.saveName(name) }, enabled = name.trim() != me?.name.orEmpty()) { Text("Save") }
+                }
+            }
+
+            Section("Profile picture") {
+                val picture = me?.picture
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AccountPicture(me, 56.dp)
+                    Spacer(Modifier.width(16.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Use your account's picture")
+                        Note(
+                            if (picture != null) "The one on your Doughmination account. Off shows your initial instead."
+                            else "Your Doughmination account has no picture, so your initial shows.",
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Switch(
+                        checked = me?.shownPicture != null,
+                        onCheckedChange = { on -> me?.let { vm.setPreferences(it.preferences.copy(usePicture = on)) } },
+                        enabled = picture != null,
+                    )
+                }
+            }
+
+            Section("Swipe actions") {
+                Note(
+                    "What swiping a conversation in the list does, here and on the web. Read and unread only " +
+                        "applies to received mail, and in the Bin a swipe right always restores.",
+                )
+                me?.let {
+                    SwipePicker("Swipe right", it.swipeRight) { choice -> vm.setPreferences(it.preferences.copy(swipeRight = choice)) }
+                    SwipePicker("Swipe left", it.swipeLeft) { choice -> vm.setPreferences(it.preferences.copy(swipeLeft = choice)) }
                 }
             }
 
@@ -176,6 +215,28 @@ private fun Section(title: String, icon: ImageVector? = null, content: @Composab
             Text(title.uppercase(), style = Eyebrow)
         }
         content()
+    }
+}
+
+/** A dropdown of the swipe actions, as an outlined field. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipePicker(label: String, selected: SwipeAction, onPick: (SwipeAction) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }) {
+        OutlinedTextField(
+            value = selected.label,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(open) },
+            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+        )
+        ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            for (choice in SwipeAction.entries) {
+                DropdownMenuItem(text = { Text(choice.label) }, onClick = { open = false; onPick(choice) })
+            }
+        }
     }
 }
 

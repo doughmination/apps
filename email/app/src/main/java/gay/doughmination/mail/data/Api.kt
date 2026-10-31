@@ -42,6 +42,8 @@ class Api(val baseUrl: String, private val tokens: TokenStore, private val onSig
     val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
+        // An enum value this build doesn't know (a newer swipe) takes the field's default.
+        coerceInputValues = true
     }
 
     private val jsonType = "application/json".toMediaType()
@@ -101,6 +103,7 @@ class Api(val baseUrl: String, private val tokens: TokenStore, private val onSig
     suspend fun me(): Me = get("/api/me")
     suspend fun unread(): Map<String, Int> = get<Unread>("/api/unread").unread
     suspend fun setName(name: String) { call<JsonObject, Name>("PATCH", "/api/me", Name(name)) }
+    suspend fun setPreferences(prefs: Preferences): Preferences = call("PATCH", "/api/me/preferences", prefs)
 
     suspend fun threads(folder: ListFolder, mailbox: String?, cursor: String?): Page<ThreadSummary> {
         val q = url("/api/threads").newBuilder().addQueryParameter("folder", folder.path)

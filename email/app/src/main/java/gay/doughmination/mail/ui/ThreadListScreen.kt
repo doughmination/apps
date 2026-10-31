@@ -34,7 +34,6 @@ import androidx.compose.material.icons.outlined.Drafts
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.MarkEmailRead
 import androidx.compose.material.icons.outlined.MarkEmailUnread
 import androidx.compose.material.icons.outlined.Menu
@@ -94,6 +93,7 @@ import androidx.compose.ui.unit.sp
 import androidx.browser.customtabs.CustomTabsIntent
 import android.net.Uri
 import gay.doughmination.mail.data.ListFolder
+import gay.doughmination.mail.data.SwipeAction
 import gay.doughmination.mail.data.ThreadSummary
 import kotlinx.coroutines.launch
 
@@ -229,70 +229,81 @@ private fun Centered(modifier: Modifier = Modifier.fillMaxSize(), content: @Comp
     ) { content() }
 }
 
+/** One way to swipe a row: what it shows underneath, and what it does. */
+private class Swipe(val label: String, val icon: ImageVector, val color: Color, val dismiss: Boolean, val run: () -> Unit)
+
+/** What a swipe set up in Settings does to this row; null where it can't apply. Same as the web. */
+private fun swipeFor(choice: SwipeAction, vm: MailViewModel, t: ThreadSummary): Swipe? = when (choice) {
+    // Only received mail has a read state.
+    SwipeAction.Read -> if (vm.folder != ListFolder.Inbox && vm.folder != ListFolder.Starred) null else Swipe(
+        if (t.unread > 0) "Read" else "Unread",
+        if (t.unread > 0) Icons.Outlined.MarkEmailRead else Icons.Outlined.MarkEmailUnread,
+        Accent,
+        dismiss = false,
+    ) { vm.toggleRead(t) }
+    SwipeAction.Star -> Swipe(
+        if (t.starred) "Unstar" else "Star",
+        if (t.starred) Icons.Outlined.StarOutline else Icons.Filled.Star,
+        Accent,
+        // Unstarring takes it out of Starred.
+        dismiss = vm.folder == ListFolder.Starred && t.starred,
+    ) { vm.toggleStar(t.id, !t.starred) }
+    SwipeAction.Bin -> Swipe("Bin", Icons.Outlined.Delete, Danger, dismiss = true) { vm.moveToBin(t.id) }
+    SwipeAction.None -> null
+}
+
 /**
- * Swipe right to toggle read (or restore, in the Bin); swipe left to bin it.
- * Same as the web app.
+ * Swipes do what Settings says (toggle read and bin it, unless changed). In
+ * the Bin, swiping right restores and left does nothing. Same as the web app.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SwipeRow(vm: MailViewModel, t: ThreadSummary, onHold: (ThreadSummary) -> Unit) {
     val inBin = vm.folder == ListFolder.Bin
-    val canToggleRead = vm.folder == ListFolder.Inbox || vm.folder == ListFolder.Starred
+    val right = if (inBin) Swipe("Restore", Icons.Outlined.RestoreFromTrash, Accent, dismiss = true) { vm.restore(t.id) }
+    else swipeFor(vm.me?.swipeRight ?: SwipeAction.Read, vm, t)
+    val left = if (inBin) null else swipeFor(vm.me?.swipeLeft ?: SwipeAction.Bin, vm, t)
     val view = LocalView.current
-    // Material can ask more than once for one swipe; a toggle must only run once.
+    // Material can ask more than once for one swipe; an action must only run once.
     var firedAt by remember { mutableStateOf(0L) }
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             val now = System.currentTimeMillis()
             if (value != SwipeToDismissBoxValue.Settled && now - firedAt < 600) return@rememberSwipeToDismissBoxState false
             if (value != SwipeToDismissBoxValue.Settled) firedAt = now
-            when (value) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    view.performHapticFeedback(swipeHaptic)
-                    if (inBin) {
-                        vm.restore(t.id)
-                        true
-                    } else {
-                        // Not dismissed: the row springs back, showing its new state.
-                        vm.toggleRead(t)
-                        false
-                    }
-                }
-                SwipeToDismissBoxValue.EndToStart -> {
-                    view.performHapticFeedback(swipeHaptic)
-                    vm.moveToBin(t.id)
-                    true
-                }
-                SwipeToDismissBoxValue.Settled -> true
-            }
+            val swipe = when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> right
+                SwipeToDismissBoxValue.EndToStart -> left
+                SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState true
+            } ?: return@rememberSwipeToDismissBoxState false
+            view.performHapticFeedback(swipeHaptic)
+            swipe.run()
+            // Not dismissed: the row springs back, showing its new state.
+            swipe.dismiss
         },
         positionalThreshold = { it * 0.35f },
     )
 
     SwipeToDismissBox(
         state = state,
-        enableDismissFromStartToEnd = inBin || canToggleRead,
-        enableDismissFromEndToStart = !inBin,
+        enableDismissFromStartToEnd = right != null,
+        enableDismissFromEndToStart = left != null,
         backgroundContent = {
             val direction = state.dismissDirection
-            val (icon, label, color) = when (direction) {
-                SwipeToDismissBoxValue.StartToEnd -> when {
-                    inBin -> Triple(Icons.Outlined.RestoreFromTrash, "Restore", Accent)
-                    t.unread > 0 -> Triple(Icons.Outlined.MarkEmailRead, "Read", Accent)
-                    else -> Triple(Icons.Outlined.MarkEmailUnread, "Unread", Accent)
-                }
-                SwipeToDismissBoxValue.EndToStart -> Triple(Icons.Outlined.Delete, "Bin", Danger)
-                SwipeToDismissBoxValue.Settled -> Triple(null, "", Color.Transparent)
+            val swipe = when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> right
+                SwipeToDismissBoxValue.EndToStart -> left
+                SwipeToDismissBoxValue.Settled -> null
             }
             Row(
-                Modifier.fillMaxSize().background(color).padding(horizontal = 24.dp),
+                Modifier.fillMaxSize().background(swipe?.color ?: Color.Transparent).padding(horizontal = 24.dp),
                 horizontalArrangement = if (direction == SwipeToDismissBoxValue.EndToStart) Arrangement.End else Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (icon != null) {
-                    Icon(icon, null, tint = Color.White)
+                if (swipe != null) {
+                    Icon(swipe.icon, null, tint = Color.White)
                     Spacer(Modifier.width(8.dp))
-                    Text(label, color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Text(swipe.label, color = Color.White, fontWeight = FontWeight.SemiBold)
                 }
             }
         },
@@ -486,7 +497,7 @@ private fun Drawer(vm: MailViewModel, close: () -> Unit) {
     ModalDrawerSheet {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(vertical = 12.dp)) {
             Row(Modifier.padding(horizontal = 24.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Mail, null, tint = Accent)
+                AccountPicture(me, 40.dp)
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(me?.name ?: me?.username ?: "Inbox", style = MaterialTheme.typography.titleMedium)

@@ -1,5 +1,6 @@
 package gay.doughmination.mail.data
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 // Mirrors email/src/shared/types.ts. Keep the two in step.
@@ -13,7 +14,30 @@ data class Me(
     /** Every address this user can send from. */
     val addresses: List<String>,
     val domains: List<String>,
-)
+    /** The account's picture on the SSO (https), whether or not it's in use. */
+    val picture: String? = null,
+    val usePicture: Boolean = true,
+    val swipeLeft: SwipeAction = SwipeAction.Bin,
+    val swipeRight: SwipeAction = SwipeAction.Read,
+) {
+    val preferences get() = Preferences(usePicture, swipeLeft, swipeRight)
+
+    /** The picture to show for the account, or null for the default (an initial). */
+    val shownPicture get() = picture?.takeIf { usePicture }
+}
+
+/** What swiping a row does. An unknown value (a newer server) reads as None. */
+@Serializable
+enum class SwipeAction(val label: String) {
+    @SerialName("none") None("Nothing"),
+    @SerialName("read") Read("Mark as read or unread"),
+    @SerialName("star") Star("Star or unstar"),
+    @SerialName("bin") Bin("Move to Bin"),
+}
+
+/** Settings that follow the user between the web and the app. */
+@Serializable
+data class Preferences(val usePicture: Boolean, val swipeLeft: SwipeAction, val swipeRight: SwipeAction)
 
 @Serializable
 data class Page<T>(val items: List<T>, val nextCursor: String? = null)
