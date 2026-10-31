@@ -17,12 +17,14 @@ class MainActivity : ComponentActivity() {
     private val vm: MailViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // The splash stays up while the inbox loads, so it opens already full.
+        // The splash stays up while the inbox loads, so it opens already full,
+        // and long enough for its opening to play even when mail is quick.
         // A slow connection gets the app (and its spinner) after a few seconds.
         val shown = SystemClock.uptimeMillis()
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                !vm.ready && SystemClock.uptimeMillis() - shown < SPLASH_MAX_MS
+                val elapsed = SystemClock.uptimeMillis() - shown
+                (!vm.ready || elapsed < SPLASH_MIN_MS) && elapsed < SPLASH_MAX_MS
             }
             // Then it lifts off the top, uncovering the inbox.
             setOnExitAnimationListener { splash ->
@@ -59,6 +61,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private companion object {
+        const val SPLASH_MIN_MS = 1500L
         const val SPLASH_MAX_MS = 4000L
     }
 }

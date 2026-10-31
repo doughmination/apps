@@ -68,9 +68,10 @@ changing too.
 ## CI
 
 `.github/workflows/android.yml` (at the repo root) builds whenever `app/`
-changes and uploads `inbox.apk` as an artifact. Each build from `main` replaces
-the rolling `latest` release, and pushing a `v*` tag attaches it to a GitHub
-release of its own. It signs with two repository secrets:
+changes and uploads the APK, named by version (`inbox-1.0.6.apk`), as an
+artifact. Each build from `main` replaces the rolling `latest` release, which
+the site's `/download` link redirects to, and pushing a `v1.2.0` tag attaches
+`inbox-1.2.0.apk` to a GitHub release of its own. It signs with two repository secrets:
 
 - `KEYSTORE_BASE64`: `base64 -w0 inbox.jks`
 - `KEYSTORE_PASSWORD`: the keystore password
