@@ -16,9 +16,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "doughmination-apps"
 
-// Each app is its own Android application module. They share this build and
-// the version catalog, never each other's code.
+// Each app is its own Android application module. They share this build, the
+// version catalog and the look (:design), never each other's code.
 include(
+    ":design",                    // the shared theme: palette, fonts, backdrop
     ":api-helper:app",            // Device Reporter
     ":email:app",                 // Inbox
     ":doughmination-manager:app", // Doughmination Manager

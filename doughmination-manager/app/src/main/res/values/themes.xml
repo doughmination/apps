@@ -1,5 +1,5 @@
 <resources>
-    <!-- Compose draws everything; this only covers the window before it does. -->
-    <style name="Theme.App" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- The shared window theme (the :design module): dark, so launching doesn't flash white. -->
+    <style name="Theme.App" parent="Theme.Doughmination" />
     <color name="ic_launcher_background">#1E1B2E</color>
 </resources>

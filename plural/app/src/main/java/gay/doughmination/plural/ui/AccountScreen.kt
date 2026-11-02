@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -73,7 +74,7 @@ fun AccountScreen(vm: SystemViewModel) {
         }
 
         Panel {
-            Text("Account", style = Eyebrow)
+            Text("ACCOUNT", style = Eyebrow)
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Avatar(user.avatarUrl, 96.dp, ring = Accent)
                 Text(user.shownName, style = MaterialTheme.typography.headlineSmall)
@@ -102,7 +103,7 @@ fun AccountScreen(vm: SystemViewModel) {
 private fun SignIn(vm: SystemViewModel) {
     val context = LocalContext.current
     Panel {
-        Text("Account", style = Eyebrow)
+        Text("ACCOUNT", style = Eyebrow)
         Text("Sign in", style = MaterialTheme.typography.headlineSmall)
         Text("Use your SSO account to continue.", color = Muted)
         Button(onClick = { vm.startLogin(context) }, enabled = !vm.signingIn) {
@@ -137,7 +138,7 @@ private fun AdminHub(vm: SystemViewModel) {
         Tile(Icons.Outlined.Group, "User management", "Manage all users") { vm.open(Screen.Users) }
     }
 
-    Panel(Modifier.border(1.dp, Bad.copy(alpha = 0.4f), RoundedCornerShape(16.dp))) {
+    Panel(Modifier.border(1.dp, Danger.copy(alpha = 0.4f), RoundedCornerShape(16.dp))) {
         Text("[ danger ] Force refresh all clients", style = MaterialTheme.typography.titleMedium)
         Text(
             "Send a refresh command to everyone viewing the website or this app. Their pages reload immediately.",
@@ -147,7 +148,7 @@ private fun AdminHub(vm: SystemViewModel) {
         Button(
             onClick = { confirmRefresh = true },
             enabled = !vm.busy,
-            colors = ButtonDefaults.buttonColors(containerColor = Bad),
+            colors = ButtonDefaults.buttonColors(containerColor = Danger),
         ) {
             Icon(Icons.Outlined.Refresh, null, Modifier.size(18.dp)); HGap(6); Text("Refresh all")
         }
@@ -196,7 +197,7 @@ fun Confirm(title: String, text: String, action: String, onDismiss: () -> Unit, 
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(text) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(action, color = Bad) } },
+        confirmButton = { TextButton(onClick = onConfirm) { Text(action, color = Danger) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }

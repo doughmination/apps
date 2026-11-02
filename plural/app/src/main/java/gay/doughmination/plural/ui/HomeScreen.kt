@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -36,6 +37,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -119,7 +121,7 @@ fun HomeScreen(vm: SystemViewModel) {
                 }
             }
 
-            item(span = full) { PageHead("// system.members", "System Members") }
+            item(span = full) { PageHead("Doughmination System", "System Members") }
 
             vm.mental?.let { state -> item(span = full) { MentalBanner(state) } }
 
@@ -157,7 +159,9 @@ fun HomeScreen(vm: SystemViewModel) {
     if (filtersOpen) {
         ModalBottomSheet(onDismissRequest = { filtersOpen = false }) {
             Column(
-                Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 32.dp),
+                // Clear of the navigation bar, so the last chips and Done stay reachable.
+                Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding()
+                    .padding(horizontal = 20.dp).padding(bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text("Filters", style = MaterialTheme.typography.titleLarge)

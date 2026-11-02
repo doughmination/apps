@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -72,7 +73,7 @@ fun MetricsScreen(vm: SystemViewModel) {
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            PageHead("// system.metrics", "Metrics", "System fronting and switching statistics")
+            PageHead("Statistics", "Metrics", "System fronting and switching statistics")
 
             vm.metricsError?.let {
                 Notice(it, error = true)

@@ -1,5 +1,6 @@
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -58,7 +59,7 @@ fun AppRoot(vm: SystemViewModel) {
                     val error = vm.flash?.error == true
                     Snackbar(
                         data,
-                        containerColor = if (error) Bad else androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHighest,
+                        containerColor = if (error) Danger else androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHighest,
                         contentColor = if (error) Color(0xFF1A0611) else TextColour,
                     )
                 }
