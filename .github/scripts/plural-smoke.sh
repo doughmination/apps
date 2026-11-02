@@ -20,8 +20,18 @@ shot() {
   echo "saved $1"
 }
 
+# Emulators on CI sometimes show "<app> isn't responding" for their own
+# launcher or System UI while booting; that dialog would swallow our taps.
+dismiss_system_dialogs() {
+  if ui | grep -q "isn't responding"; then
+    echo "Dismissing a system \"isn't responding\" dialog"
+    tap_raw "Wait" || adb shell input keyevent 4
+    sleep 1
+  fi
+}
+
 # Taps the middle of the first element whose text (or description) is exactly $1.
-tap_text() {
+tap_raw() {
   local bounds
   bounds=$(ui | grep -oE "(text|content-desc)=\"$1\"[^>]*bounds=\"\[[0-9]+,[0-9]+\]\[[0-9]+,[0-9]+\]\"" | head -1 \
     | grep -oE 'bounds="[^"]+"' | grep -oE '[0-9]+' | tr '\n' ' ' || true)
@@ -31,6 +41,20 @@ tap_text() {
   fi
   set -- $bounds
   adb shell input tap $(( ($1 + $3) / 2 )) $(( ($2 + $4) / 2 ))
+}
+
+tap_text() {
+  dismiss_system_dialogs
+  tap_raw "$1"
+}
+
+# Fails unless the screen shows text containing $1.
+expect() {
+  if ! ui | grep -qF "text=\"$1"; then
+    echo "::error::Expected \"$1\" on screen at step $2"
+    exit 1
+  fi
+  echo "found \"$1\""
 }
 
 alive() {
@@ -43,6 +67,8 @@ alive() {
 }
 
 adb logcat -c
+sleep 20
+dismiss_system_dialogs
 adb install -r "$apk"
 adb shell dumpsys package "$pkg" | grep -E "versionCode|versionName" | head -2
 
@@ -50,6 +76,9 @@ adb shell am start -W -n "$pkg/.MainActivity"
 # The first load fetches members, fronters, the system and relationships.
 shot 01-members 10
 alive "launch"
+dismiss_system_dialogs
+expect "System Members" "launch"
+expect "Search members" "launch"
 
 size=$(adb shell wm size | grep -oE '[0-9]+x[0-9]+' | tail -1)
 width=${size%x*}
@@ -68,18 +97,24 @@ adb shell input keyevent 4
 tap_text "Filters" && shot 04-filters 2 && adb shell input keyevent 4 || true
 alive "the filters"
 
-tap_text "Relationships" && shot 05-relationships 5
+tap_text "Relationships" || exit 1
+shot 05-relationships 5
 alive "relationships"
+expect "Relationship Map" "relationships"
 adb shell input swipe $(( width / 2 )) $(( height * 3 / 4 )) $(( width / 2 )) $(( height / 4 )) 400
 shot 06-relationships-pairs 2
 
-tap_text "Metrics" && shot 07-metrics 8
+tap_text "Metrics" || exit 1
+shot 07-metrics 8
 alive "metrics"
+expect "Fronting time distribution" "metrics"
 adb shell input swipe $(( width / 2 )) $(( height * 3 / 4 )) $(( width / 2 )) $(( height / 4 )) 400
 shot 08-metrics-scrolled 2
 
-tap_text "Account" && shot 09-account 2
+tap_text "Account" || exit 1
+shot 09-account 2
 alive "account"
+expect "Sign in with SSO" "account"
 
 # Background and foreground again: the socket reconnects and data refreshes.
 adb shell input keyevent 3
