@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Renders art/icon.svg into the adaptive launcher foreground at every density.
-# Needs rsvg-convert (librsvg). Run from the repo root: ./art/render-icons.sh
+# Needs rsvg-convert (librsvg). Run from api-helper/: ./art/render-icons.sh
 set -euo pipefail
 
 res=app/src/main/res

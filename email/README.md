@@ -1,6 +1,6 @@
 # Inbox for Android
 
-A native Android app (Kotlin, Jetpack Compose) for [Inbox](../email). It talks
+A native Android app (Kotlin, Jetpack Compose) for [Inbox](https://github.com/doughmination/email). It talks
 to the same Worker API as the web app.
 
 ```
@@ -12,7 +12,7 @@ app/src/main/java/gay/doughmination/mail/
     Auth.kt            sign-in through the SSO in a browser tab (code + PKCE)
     TokenStore.kt      session token, encrypted with an Android Keystore key
     Live.kt            the /api/live WebSocket while the app is open
-    Models.kt          mirrors email/src/shared/types.ts
+    Models.kt          mirrors src/shared/types.ts in doughmination/email
   ui/
     MailViewModel.kt   state and actions for every screen
     ThreadListScreen   folders, swipe actions, long-press menu
@@ -36,23 +36,22 @@ app/src/main/java/gay/doughmination/mail/
 
 ## Building
 
-Needs JDK 17–21 (Gradle 8.11 doesn't run on newer JDKs) and the Android SDK
-(platform 35).
+From the repository root (see [the root README](../README.md) for JDK and SDK):
 
 ```sh
-echo "sdk.dir=/opt/android-sdk" > local.properties
-./gradlew assembleDebug       # app/build/outputs/apk/debug/app-debug.apk
-./gradlew assembleRelease     # app/build/outputs/apk/release/app-release.apk
+./gradlew :email:app:assembleDebug       # email/app/build/outputs/apk/debug/app-debug.apk
+./gradlew :email:app:assembleRelease     # email/app/build/outputs/apk/release/app-release.apk
 ```
 
 `-PinboxUrl=http://10.0.2.2:5173` points a build at `npm run dev` from the
 emulator. Signing in locally needs `/auth/*` to reach that server too.
 
 Notifications need Firebase: put the project's `google-services.json` at
-`app/google-services.json` (next to `app/build.gradle.kts`). Without it the app
-still builds, with notifications off and Settings saying so.
+`email/app/google-services.json` (next to its `build.gradle.kts`). Without it
+the app still builds, with notifications off and Settings saying so.
 
-Signing reads `keystore.properties` (gitignored):
+Signing reads `email/keystore.properties` (gitignored), with `storeFile`
+relative to `email/`:
 
 ```properties
 storeFile=inbox.jks
@@ -67,13 +66,14 @@ changing too.
 
 ## CI
 
-`.github/workflows/android.yml` (at the repo root) builds whenever `app/`
-changes and uploads the APK, named by version (`inbox-1.0.6.apk`), as an
-artifact. Each build from `main` replaces the rolling `latest` release, which
-the site's `/download` link redirects to, and pushing a `v1.2.0` tag attaches
-`inbox-1.2.0.apk` to a GitHub release of its own. It signs with two repository secrets:
+`.github/workflows/inbox.yml` builds whenever `email/` (or the shared Gradle
+setup) changes and uploads the APK, named by version (`inbox-1.0.112.apk`), as
+an artifact. Each build from `main` replaces the rolling `inbox-latest`
+release, which the mail site's `/download` link redirects to, and pushing an
+`inbox-v1.2.0` tag attaches `inbox-1.2.0.apk` to a release of its own. Secrets
+(`INBOX_KEYSTORE_BASE64`, `INBOX_KEYSTORE_PASSWORD`, optionally
+`INBOX_GOOGLE_SERVICES_JSON`) and version codes are in
+[docs/releasing.md](../docs/releasing.md).
 
-- `KEYSTORE_BASE64`: `base64 -w0 inbox.jks`
-- `KEYSTORE_PASSWORD`: the keystore password
-- `GOOGLE_SERVICES_JSON` (optional): `base64 -w0 google-services.json`, if you'd
-  rather not commit the file
+Builds up to 1.0.7 were released from doughmination/email; they're still on
+its releases page, and these install over them.

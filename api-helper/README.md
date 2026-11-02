@@ -83,53 +83,33 @@ doughnut family's: bat-winged doughnut over a phone sending signal. The source a
 
 ## Getting the APK
 
-There's no Android Studio needed — GitHub builds it for you.
+There's no Android Studio needed — GitHub builds it for you. Device Reporter lives in the
+[doughmination/apps](https://github.com/doughmination/apps) monorepo, and its workflow is
+`.github/workflows/device-reporter.yml`.
 
-**Quick test build:** every push runs the workflow and produces a debug APK. Open the run
-under the **Actions** tab and download the **device-reporter-debug-apk** artifact. Good for
-trying things out; signed with Android's throwaway debug key.
+**Quick test build:** every push to `main` that touches `api-helper/` runs the workflow and
+uploads an APK. Open the run under the **Actions** tab and download the
+**device-reporter-…** artifact. Good for trying things out.
 
-**Proper signed release:** go to the **Actions** tab → **Build APK** → **Run workflow**, type
-a version like `v1.0.0` in the box, and run it. GitHub builds a signed APK, creates that tag,
-and publishes it as the latest Release. This is the one to actually keep on your phone.
-(If you'd rather, pushing a `v*` tag from your terminal does the exact same thing.)
+**Proper signed release:** go to the **Actions** tab → **Device Reporter** → **Run workflow**,
+type a version like `v2.1.0` in the box, and run it. GitHub builds a signed APK, creates the
+`device-reporter-v2.1.0` tag, and publishes it as a Release. This is the one to actually keep
+on your phone. (Pushing a `device-reporter-v2.1.0` tag from your terminal does the same.)
 
-A minute later, your repo's **Releases** page has `device-reporter-v1.0.0.apk` sitting at the
-top marked "Latest". Download it straight onto the phone.
+A minute later the repo's **Releases** page has `device-reporter-2.1.0.apk`. Download it
+straight onto the phone. Version codes, tags and the signing secrets
+(`DEVICE_REPORTER_*`) are covered in [docs/releasing.md](../docs/releasing.md).
 
-### One-time signing setup
-
-You need a keystore (your personal signing key) and four repo secrets. Make the keystore once:
-
-```bash
-keytool -genkeypair -v \
-  -keystore release.keystore \
-  -alias device-reporter \
-  -keyalg RSA -keysize 2048 -validity 10000
-```
-
-It'll ask for a password and a few details — remember the password. Then base64-encode the
-keystore so it can live in a secret:
-
-```bash
-base64 -i release.keystore | pbcopy   # macOS: now in your clipboard
-```
-
-In your repo, go to **Settings → Secrets and variables → Actions** and add four secrets:
-
-- `SIGNING_KEYSTORE_BASE64` — paste the base64 blob from above.
-- `SIGNING_STORE_PASSWORD` — the keystore password.
-- `SIGNING_KEY_ALIAS` — `device-reporter` (or whatever `-alias` you used).
-- `SIGNING_KEY_PASSWORD` — the key password (same as the store password unless you set a separate one).
-
-Keep `release.keystore` itself safe and out of git — losing it means you can't ship signed
-updates that install over an existing copy. That's it; tag a version and the release builds itself.
+Keep the keystore safe and out of git — losing it means you can't ship signed updates that
+install over an existing copy.
 
 ### Building locally instead
 
+From the repo root:
+
 ```bash
-./gradlew assembleDebug     # app/build/outputs/apk/debug/app-debug.apk
-./gradlew assembleRelease   # falls back to the debug key if no signing secrets are set
+./gradlew :api-helper:app:assembleDebug     # api-helper/app/build/outputs/apk/debug/app-debug.apk
+./gradlew :api-helper:app:assembleRelease   # falls back to the debug key if no SIGNING_* variables are set
 ```
 
 ## Installing on the phone
@@ -152,5 +132,6 @@ app/src/main/java/uk/doughmination/devicereporter/
   ReporterService.kt   the always-on service: event triggers + 5-minute alarm
   BootReceiver.kt      brings the service back after a reboot or app update
 art/icon.svg                  launcher icon source; render-icons.sh rebuilds the PNGs
-.github/workflows/build.yml   builds the debug APK and publishes signed releases
 ```
+
+Gradle and its version catalog are shared with the other apps from the repository root.
