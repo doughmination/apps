@@ -8,10 +8,10 @@ own repositories (the mail server is [doughmination/email](https://github.com/do
 | Device Reporter | [`api-helper/`](api-helper/) | `:api-helper:app` | `uk.doughmination.devicereporter` | `device-reporter.yml` |
 | Inbox | [`email/`](email/) | `:email:app` | `gay.doughmination.mail` | `inbox.yml` |
 | Doughmination Manager | [`doughmination-manager/`](doughmination-manager/) | `:doughmination-manager:app` | `gay.doughmination.manager` | `manager.yml` |
-| Plural | [`plural/`](plural/) | `:plural:app` | `gay.doughmination.plural` | `plural.yml` |
+| System (Plural) | [`plural/`](plural/) | `:plural:app` | `gay.doughmination.plural` | `plural.yml` |
 
-Doughmination Manager and Plural are placeholders for now: they build and run,
-and nothing else.
+Doughmination Manager is a placeholder for now: it builds and runs, and
+nothing else. Plural is the System app; see [plural/README.md](plural/README.md).
 
 ## Layout
 

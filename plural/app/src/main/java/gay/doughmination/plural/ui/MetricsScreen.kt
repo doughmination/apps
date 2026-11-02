@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -93,10 +94,10 @@ fun MetricsScreen(vm: SystemViewModel) {
             }
 
             switches?.let { s ->
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Stat("Total switches", "${s.totalSwitches}", "Last 30 days", Modifier.weight(1f))
-                    Stat("Avg per day", "%.1f".format(s.averagePerDay), "Switches per day", Modifier.weight(1f))
-                    Stat("Selected", "${s[timeframe]}", timeframe.label, Modifier.weight(1f))
+                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Stat("Switches", "${s.totalSwitches}", "Last 30 days", Modifier.weight(1f).fillMaxHeight())
+                    Stat("Per day", "%.1f".format(s.averagePerDay), "On average", Modifier.weight(1f).fillMaxHeight())
+                    Stat("Selected", "${s[timeframe]}", timeframe.label, Modifier.weight(1f).fillMaxHeight())
                 }
             }
 
