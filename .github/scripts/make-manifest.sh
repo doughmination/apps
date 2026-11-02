@@ -29,7 +29,7 @@ now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 head_commit=$(git rev-parse HEAD)
 
 # Files every app's build depends on. Changing any of them rebuilds every app.
-shared="gradle build.gradle.kts settings.gradle.kts gradle.properties gradlew"
+shared="design gradle build.gradle.kts settings.gradle.kts gradle.properties gradlew"
 
 fingerprint() {
   local paths="$1 $shared" p

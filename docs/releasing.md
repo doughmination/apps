@@ -52,7 +52,7 @@ push that only touches `plural/`, the System app becomes 2.1.15 while Inbox
 stays at, say, 2.1.9, and the Manager offers only the System update.
 
 "Changed" means the app's fingerprint changed: a hash of its directory plus
-the shared build files (`gradle/`, `build.gradle.kts`, `settings.gradle.kts`,
+the shared files (`design/`, `gradle/`, `build.gradle.kts`, `settings.gradle.kts`,
 `gradle.properties`, `gradlew`). Changing a shared file, or `appVersion`,
 releases every app. The fingerprint is stored in the manifest (`sourceHash`).
 
