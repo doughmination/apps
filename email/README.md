@@ -68,9 +68,9 @@ changing too.
 
 `.github/workflows/inbox.yml` builds whenever `email/` (or the shared Gradle
 setup) changes and uploads the APK, named by version (`inbox-1.0.112.apk`), as
-an artifact. Each build from `main` replaces the rolling `inbox-latest`
-release, which the mail site's `/download` link redirects to, and pushing an
-`inbox-v1.2.0` tag attaches `inbox-1.2.0.apk` to a release of its own. Secrets
+a release of its own (`inbox-v1.0.112`). Each build from `main` also replaces the
+rolling `inbox-latest` release, which the mail site's `/download` link
+redirects to, and pushing an `inbox-v1.2.0` tag attaches `inbox-1.2.0.apk` to a release of its own. Secrets
 (`INBOX_KEYSTORE_BASE64`, `INBOX_KEYSTORE_PASSWORD`, optionally
 `INBOX_GOOGLE_SERVICES_JSON`) and version codes are in
 [docs/releasing.md](../docs/releasing.md).

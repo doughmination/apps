@@ -87,9 +87,9 @@ There's no Android Studio needed — GitHub builds it for you. Device Reporter l
 [doughmination/apps](https://github.com/doughmination/apps) monorepo, and its workflow is
 `.github/workflows/device-reporter.yml`.
 
-**Quick test build:** every push to `main` that touches `api-helper/` runs the workflow and
-uploads an APK. Open the run under the **Actions** tab and download the
-**device-reporter-…** artifact. Good for trying things out.
+**Every change:** every push to `main` that touches `api-helper/` builds a signed APK and
+publishes it as a release (`device-reporter-v2.0.N`). Download it from the repo's
+**Releases** page.
 
 **Proper signed release:** go to the **Actions** tab → **Device Reporter** → **Run workflow**,
 type a version like `v2.1.0` in the box, and run it. GitHub builds a signed APK, creates the

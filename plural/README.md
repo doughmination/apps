@@ -81,6 +81,7 @@ From the repository root:
 
 `-PapiUrl=https://…/v2` points a build at another API.
 
-CI: `plural.yml` builds and signs it (tags `plural-v*` release it), and
+CI: `plural.yml` builds, signs and releases it on every push to `main` that
+touches `plural/` (`plural-v0.1.N`), and
 `plural-smoke.yml` installs the signed APK on an emulator, walks the tabs and
 uploads screenshots.

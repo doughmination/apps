@@ -104,6 +104,7 @@ jobs:
           MANUAL: ${{ inputs.release_version }}
           BASE: ${{ inputs.version_code_base }}
           DEV_PREFIX: ${{ inputs.dev_version_prefix }}
+          EVENT: ${{ github.event_name }}
         run: |
           code=$((BASE + GITHUB_RUN_NUMBER))
           if [ "$IS_TAG" = true ]; then
@@ -111,6 +112,10 @@ jobs:
             tag=$REF_NAME
           elif [ -n "$MANUAL" ]; then
             name=${MANUAL#v}
+            tag="$PREFIX$name"
+          elif [ "$EVENT" != pull_request ] && [ "$GITHUB_REF" = refs/heads/main ]; then
+            # Every build from main is released, named by its version code.
+            name="$DEV_PREFIX.$code"
             tag="$PREFIX$name"
           else
             name="$DEV_PREFIX.$code"
@@ -222,7 +227,7 @@ jobs:
 
       # A rolling release that always holds the newest build from main.
       - name: Publish rolling release
-        if: env.IS_ROLLING == 'true' && env.RELEASE_TAG == ''
+        if: env.IS_ROLLING == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ROLLING: ${{ inputs.rolling_tag }}

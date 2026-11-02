@@ -1,22 +1,30 @@
 # Releasing
 
-Each app releases on its own: a tag for one app builds and publishes only that
-app. All of it runs in `.github/workflows/android-app.yml`, called by each
-app's workflow.
+Each app releases on its own, and only when it changed. All of it runs in
+`.github/workflows/android-app.yml`, called by each app's workflow.
 
 ## When CI runs
 
 An app's workflow runs when a push to `main` (or a pull request) touches its
 directory, the shared Gradle files (`gradle/`, `*.gradle.kts`,
 `gradle.properties`, `gradlew*`), or its workflow, and whenever its release tag
-is pushed. Every run builds the release APK and uploads it as a run artifact.
+is pushed.
 
-| App | Release tag | Also |
+- **Every push to `main` that builds an app publishes a release of it**, signed,
+  named by its version: `plural-v0.1.107` holds `plural-0.1.107.apk`. A change
+  to the shared Gradle files or `android-app.yml` releases every app.
+- Pull requests only build (unsigned or debug-signed) and publish nothing.
+- A tag, or "Run workflow" with a version, publishes a release with a chosen
+  version name instead, for when a build deserves a real number.
+
+| App | Releases from `main` | Chosen version |
 |---|---|---|
-| Device Reporter | `device-reporter-v2.1.0` | "Run workflow" with a version creates the tag |
-| Inbox | `inbox-v1.2.0` | every build from `main` replaces the `inbox-latest` release |
-| Doughmination Manager | `manager-v0.1.0` | "Run workflow" with a version creates the tag |
-| Plural | `plural-v0.1.0` | "Run workflow" with a version creates the tag |
+| Device Reporter | `device-reporter-v2.0.N` | `device-reporter-v2.1.0` |
+| Inbox | `inbox-v1.0.N`, and `inbox-latest` always holds the newest | `inbox-v1.2.0` |
+| Doughmination Manager | `manager-v0.1.N` | `manager-v0.1.0` |
+| Plural | `plural-v0.1.N` | `plural-v0.1.0` |
+
+(`N` is the version code.) The mail site's `/download` follows `inbox-latest`.
 
 ```sh
 git tag inbox-v1.2.0 && git push origin inbox-v1.2.0
