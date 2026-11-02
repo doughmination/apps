@@ -1,0 +1,48 @@
+name: Inbox
+
+on:
+  push:
+    branches: [main]
+    tags: ["inbox-v*"]
+    paths: &paths
+      - "email/**"
+      - "gradle/**"
+      - "*.gradle.kts"
+      - "gradle.properties"
+      - "gradlew*"
+      - ".github/workflows/inbox.yml"
+      - ".github/workflows/android-app.yml"
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
+
+# Builds from main replace the same rolling release, so let them finish in order.
+concurrency:
+  group: inbox-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  inbox:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/android-app.yml
+    with:
+      app: Inbox
+      module: ":email:app"
+      module_dir: email/app
+      package_name: gay.doughmination.mail
+      artifact: inbox
+      tag_prefix: inbox-v
+      # Builds 1-7 shipped from doughmination/email; stay above them.
+      version_code_base: 100
+      dev_version_prefix: "1.0"
+      signing: properties
+      properties_dir: email
+      key_alias: inbox
+      google_services_path: email/app/google-services.json
+      # The mail site's /download link redirects to this release's APK.
+      rolling_tag: inbox-latest
+    secrets:
+      keystore_base64: ${{ secrets.INBOX_KEYSTORE_BASE64 }}
+      store_password: ${{ secrets.INBOX_KEYSTORE_PASSWORD }}
+      google_services_json: ${{ secrets.INBOX_GOOGLE_SERVICES_JSON }}

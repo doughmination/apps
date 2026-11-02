@@ -1,84 +1,49 @@
-name: Build APK
+name: Device Reporter
 
 on:
   push:
-    branches: [ "**" ]
-    tags: [ "v*" ]
+    branches: [main]
+    tags: ["device-reporter-v*"]
+    paths: &paths
+      - "api-helper/**"
+      - "gradle/**"
+      - "*.gradle.kts"
+      - "gradle.properties"
+      - "gradlew*"
+      - ".github/workflows/device-reporter.yml"
+      - ".github/workflows/android-app.yml"
   pull_request:
+    paths: *paths
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version, e.g. v1.0.0. Leave blank to just build a debug APK."
+        description: "Release version, e.g. v2.1.0 (creates device-reporter-v2.1.0). Leave blank to just build."
         required: false
         type: string
 
-jobs:
-  # Every push/PR/manual run: build an unsigned debug APK, downloadable from the run's artifacts.
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-      - uses: android-actions/setup-android@v4
-        with:
-          packages: platform-tools platforms;android-35 build-tools;35.0.0
-          log-accepted-android-sdk-licenses: false
-      - run: chmod +x ./gradlew
-      - run: ./gradlew assembleDebug --stacktrace
-      - uses: actions/upload-artifact@v4
-        with:
-          name: device-reporter-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+concurrency:
+  group: device-reporter-${{ github.ref }}
+  cancel-in-progress: false
 
-  # Builds a SIGNED release and publishes it as the latest Release.
-  # Triggered by: "Run workflow" with a version filled in, OR pushing a v* tag.
-  release:
-    if: >
-      (github.event_name == 'workflow_dispatch' && inputs.version != '') ||
-      startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
+jobs:
+  device-reporter:
     permissions:
       contents: write
-    env:
-      # Version from the manual input, falling back to the tag name on a tag push.
-      VERSION: ${{ inputs.version || github.ref_name }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-      - uses: android-actions/setup-android@v4
-        with:
-          packages: platform-tools platforms;android-35 build-tools;35.0.0
-          log-accepted-android-sdk-licenses: false
-      - run: chmod +x ./gradlew
-
-      - name: Decode signing keystore
-        run: echo "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
-
-      - name: Build signed release APK
-        env:
-          SIGNING_STORE_FILE: ${{ runner.temp }}/release.keystore
-          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease --stacktrace
-
-      - name: Rename APK with version
-        run: |
-          mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/device-reporter-${VERSION}.apk"
-
-      - name: Publish GitHub Release (creates the tag, marked latest)
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/device-reporter-${{ env.VERSION }}.apk
-          name: Device Reporter ${{ env.VERSION }}
-          tag_name: ${{ env.VERSION }}
-          make_latest: true
-          generate_release_notes: true
+    uses: ./.github/workflows/android-app.yml
+    with:
+      app: Device Reporter
+      module: ":api-helper:app"
+      module_dir: api-helper/app
+      package_name: uk.doughmination.devicereporter
+      artifact: device-reporter
+      tag_prefix: device-reporter-v
+      # v2.0.0 shipped as versionCode 2 from doughmination/api-helper; stay above it.
+      version_code_base: 100
+      dev_version_prefix: "2.0"
+      signing: env
+      release_version: ${{ inputs.version }}
+    secrets:
+      keystore_base64: ${{ secrets.DEVICE_REPORTER_KEYSTORE_BASE64 }}
+      store_password: ${{ secrets.DEVICE_REPORTER_STORE_PASSWORD }}
+      key_alias: ${{ secrets.DEVICE_REPORTER_KEY_ALIAS }}
+      key_password: ${{ secrets.DEVICE_REPORTER_KEY_PASSWORD }}

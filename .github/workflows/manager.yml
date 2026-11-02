@@ -1,0 +1,48 @@
+name: Doughmination Manager
+
+on:
+  push:
+    branches: [main]
+    tags: ["manager-v*"]
+    paths: &paths
+      - "doughmination-manager/**"
+      - "gradle/**"
+      - "*.gradle.kts"
+      - "gradle.properties"
+      - "gradlew*"
+      - ".github/workflows/manager.yml"
+      - ".github/workflows/android-app.yml"
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, e.g. v0.1.0 (creates manager-v0.1.0). Leave blank to just build."
+        required: false
+        type: string
+
+concurrency:
+  group: manager-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  manager:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/android-app.yml
+    with:
+      app: Doughmination Manager
+      module: ":doughmination-manager:app"
+      module_dir: doughmination-manager/app
+      package_name: gay.doughmination.manager
+      artifact: manager
+      tag_prefix: manager-v
+      version_code_base: 100
+      dev_version_prefix: "0.1"
+      signing: env
+      release_version: ${{ inputs.version }}
+    secrets:
+      keystore_base64: ${{ secrets.MANAGER_KEYSTORE_BASE64 }}
+      store_password: ${{ secrets.MANAGER_STORE_PASSWORD }}
+      key_alias: ${{ secrets.MANAGER_KEY_ALIAS }}
+      key_password: ${{ secrets.MANAGER_KEY_PASSWORD }}

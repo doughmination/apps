@@ -1,0 +1,48 @@
+name: Plural
+
+on:
+  push:
+    branches: [main]
+    tags: ["plural-v*"]
+    paths: &paths
+      - "plural/**"
+      - "gradle/**"
+      - "*.gradle.kts"
+      - "gradle.properties"
+      - "gradlew*"
+      - ".github/workflows/plural.yml"
+      - ".github/workflows/android-app.yml"
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, e.g. v0.1.0 (creates plural-v0.1.0). Leave blank to just build."
+        required: false
+        type: string
+
+concurrency:
+  group: plural-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plural:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/android-app.yml
+    with:
+      app: Plural
+      module: ":plural:app"
+      module_dir: plural/app
+      package_name: gay.doughmination.plural
+      artifact: plural
+      tag_prefix: plural-v
+      version_code_base: 100
+      dev_version_prefix: "0.1"
+      signing: env
+      release_version: ${{ inputs.version }}
+    secrets:
+      keystore_base64: ${{ secrets.PLURAL_KEYSTORE_BASE64 }}
+      store_password: ${{ secrets.PLURAL_STORE_PASSWORD }}
+      key_alias: ${{ secrets.PLURAL_KEY_ALIAS }}
+      key_password: ${{ secrets.PLURAL_KEY_PASSWORD }}
