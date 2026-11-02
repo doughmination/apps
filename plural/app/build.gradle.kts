@@ -13,14 +13,15 @@ android {
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        // Not released yet, so this ID can still change. Once an APK ships,
-        // it (and the signing key) must stay the same for updates to install.
+        // Released: this ID (and the signing key) must never change, or
+        // updates won't install over what people have.
         applicationId = "gay.doughmination.plural"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        // CI sets these (see docs/releasing.md); local builds use the fallbacks.
+        // CI sets these from appVersion in gradle.properties (docs/releasing.md);
+        // local builds use the fallbacks.
         versionCode = System.getenv("VERSION_CODE")?.toInt() ?: 1
-        versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
+        versionName = System.getenv("VERSION_NAME") ?: "${project.property("appVersion")}.0"
         buildConfigField("String", "API_URL", "\"$apiUrl\"")
         // Member pages on the website, for sharing.
         buildConfigField("String", "SITE_URL", "\"https://doughmination.co.uk\"")

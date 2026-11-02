@@ -14,9 +14,10 @@ android {
         applicationId = "gay.doughmination.manager"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        // CI sets these (see docs/releasing.md); local builds use the fallbacks.
+        // CI sets these from appVersion in gradle.properties (docs/releasing.md);
+        // local builds use the fallbacks.
         versionCode = System.getenv("VERSION_CODE")?.toInt() ?: 1
-        versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
+        versionName = System.getenv("VERSION_NAME") ?: "${project.property("appVersion")}.0"
     }
 
     // Same convention as Device Reporter: CI passes the key through SIGNING_*

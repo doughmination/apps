@@ -66,14 +66,13 @@ changing too.
 
 ## CI
 
-`.github/workflows/inbox.yml` builds whenever `email/` (or the shared Gradle
-setup) changes and uploads the APK, named by version (`inbox-1.0.112.apk`), as
-a release of its own (`inbox-v1.0.112`). Each build from `main` also replaces the
-rolling `inbox-latest` release, which the mail site's `/download` link
-redirects to, and pushing an `inbox-v1.2.0` tag attaches `inbox-1.2.0.apk` to a release of its own. Secrets
+Every push to `main` builds Inbox with the other apps (`.github/workflows/apps.yml`)
+and publishes it to the rolling `latest` release as `inbox.apk`, which the mail
+site's `/download` link redirects to:
+https://github.com/doughmination/apps/releases/latest/download/inbox.apk. Secrets
 (`INBOX_KEYSTORE_BASE64`, `INBOX_KEYSTORE_PASSWORD`, optionally
-`INBOX_GOOGLE_SERVICES_JSON`) and version codes are in
+`INBOX_GOOGLE_SERVICES_JSON`) and versions are in
 [docs/releasing.md](../docs/releasing.md).
 
-Builds up to 1.0.7 were released from doughmination/email; they're still on
-its releases page, and these install over them.
+Builds up to 1.0.7 were released from doughmination/email, signed with an older
+key: uninstall one of those once before installing a build from here.

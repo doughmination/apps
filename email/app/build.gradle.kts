@@ -32,9 +32,10 @@ android {
         applicationId = "gay.doughmination.mail"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        // CI sets these so every build installs over the last (see docs/releasing.md).
+        // CI sets these from appVersion in gradle.properties (docs/releasing.md);
+        // local builds use the fallbacks.
         versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
-        versionName = System.getenv("VERSION_NAME") ?: "1.0"
+        versionName = System.getenv("VERSION_NAME") ?: "${project.property("appVersion")}.0"
         buildConfigField("String", "INBOX_URL", "\"$inboxUrl\"")
     }
 

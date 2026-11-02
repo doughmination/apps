@@ -81,7 +81,7 @@ From the repository root:
 
 `-PapiUrl=https://…/v2` points a build at another API.
 
-CI: `plural.yml` builds, signs and releases it on every push to `main` that
-touches `plural/` (`plural-v0.1.N`), and
-`plural-smoke.yml` installs the signed APK on an emulator, walks the tabs and
-uploads screenshots.
+CI: every push to `main` builds it with the other apps (`.github/workflows/apps.yml`),
+publishes it to the rolling release as `system.apk`
+(https://github.com/doughmination/apps/releases/latest/download/system.apk), then installs
+it on an emulator, walks the tabs and uploads screenshots.

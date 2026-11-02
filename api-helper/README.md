@@ -84,20 +84,13 @@ doughnut family's: bat-winged doughnut over a phone sending signal. The source a
 ## Getting the APK
 
 There's no Android Studio needed — GitHub builds it for you. Device Reporter lives in the
-[doughmination/apps](https://github.com/doughmination/apps) monorepo, and its workflow is
-`.github/workflows/device-reporter.yml`.
+[doughmination/apps](https://github.com/doughmination/apps) monorepo, which builds every app with
+one workflow.
 
-**Every change:** every push to `main` that touches `api-helper/` builds a signed APK and
-publishes it as a release (`device-reporter-v2.0.N`). Download it from the repo's
-**Releases** page.
+**Install:** every push to `main` publishes a signed build. The newest is always at
+https://github.com/doughmination/apps/releases/latest/download/device-reporter.apk.
 
-**Proper signed release:** go to the **Actions** tab → **Device Reporter** → **Run workflow**,
-type a version like `v2.1.0` in the box, and run it. GitHub builds a signed APK, creates the
-`device-reporter-v2.1.0` tag, and publishes it as a Release. This is the one to actually keep
-on your phone. (Pushing a `device-reporter-v2.1.0` tag from your terminal does the same.)
-
-A minute later the repo's **Releases** page has `device-reporter-2.1.0.apk`. Download it
-straight onto the phone. Version codes, tags and the signing secrets
+Versions and the signing secrets
 (`DEVICE_REPORTER_*`) are covered in [docs/releasing.md](../docs/releasing.md).
 
 Keep the keystore safe and out of git — losing it means you can't ship signed updates that

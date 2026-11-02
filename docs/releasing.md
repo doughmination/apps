@@ -1,60 +1,50 @@
 # Releasing
 
-Each app releases on its own, and only when it changed. All of it runs in
-`.github/workflows/android-app.yml`, called by each app's workflow.
+One workflow, `.github/workflows/apps.yml`, builds and releases every app
+together. There is one release, **`latest`**, and it always holds the newest
+build of all four apps.
 
-## When CI runs
+## What happens on a push
 
-An app's workflow runs when a push to `main` (or a pull request) touches its
-directory, the shared Gradle files (`gradle/`, `*.gradle.kts`,
-`gradle.properties`, `gradlew*`), or its workflow, and whenever its release tag
-is pushed.
+- **Every push to `main`** builds all four apps, each signed with its own key,
+  checks the signatures, and replaces the `latest` release with them. Then it
+  installs the System app on an emulator and walks its screens
+  (`.github/scripts/plural-smoke.sh`); screenshots are attached to the run.
+- **Pull requests** build and run the emulator test, and publish nothing.
 
-- **Every push to `main` that builds an app publishes a release of it**, signed,
-  named by its version: `plural-v0.1.107` holds `plural-0.1.107.apk`. A change
-  to the shared Gradle files or `android-app.yml` releases every app.
-- Pull requests only build (unsigned or debug-signed) and publish nothing.
-- A tag, or "Run workflow" with a version, publishes a release with a chosen
-  version name instead, for when a build deserves a real number.
+The release's files keep the same names, so these links always give the
+newest build:
 
-| App | Releases from `main` | Chosen version |
-|---|---|---|
-| Device Reporter | `device-reporter-v2.0.N` | `device-reporter-v2.1.0` |
-| Inbox | `inbox-v1.0.N`, and `inbox-latest` always holds the newest | `inbox-v1.2.0` |
-| Doughmination Manager | `manager-v0.1.N` | `manager-v0.1.0` |
-| Plural | `plural-v0.1.N` | `plural-v0.1.0` |
+| App | Link |
+|---|---|
+| System | https://github.com/doughmination/apps/releases/latest/download/system.apk |
+| Inbox | https://github.com/doughmination/apps/releases/latest/download/inbox.apk |
+| Device Reporter | https://github.com/doughmination/apps/releases/latest/download/device-reporter.apk |
+| Doughmination Manager | https://github.com/doughmination/apps/releases/latest/download/doughmination-manager.apk |
 
-(`N` is the version code.) The mail site's `/download` follows `inbox-latest`.
+Next to them, `versions.json` lists each APK's package name, version, SHA-256
+and size, for the Manager's manifest ([manifest.md](manifest.md)). The mail
+site's `/download` sends people to `inbox.apk`.
 
-```sh
-git tag inbox-v1.2.0 && git push origin inbox-v1.2.0
-```
+## Versions
 
-Releases are never marked as the repository's "Latest" (only one release can
-be, and there are several apps). Link to a specific tag instead, as the mail
-site's `/download` does with `inbox-latest`.
-
-Each release carries the APK (`inbox-1.2.0.apk`) and a metadata file next to
-it (`inbox-1.2.0.json`) with the package name, version code and name, SHA-256
-and size, for building the Manager manifest ([manifest.md](manifest.md)).
-
-## Version codes
-
-Android only installs an update whose `versionCode` is higher than the
-installed one, so CI sets it:
+Every app carries the same version:
 
 ```
-versionCode = 100 + the workflow's run number
-versionName = the tag's version (1.2.0), or <prefix>.<versionCode> for untagged builds
+versionName = <appVersion>.<build number>    e.g. 2.1.14
+versionCode = 1000 + <build number>
 ```
 
-The base of 100 keeps every app above the builds it shipped before moving here
-(Inbox reached 7 in doughmination/email, Device Reporter 2 in
-doughmination/api-helper). Run numbers only ever go up, but they belong to the
-workflow file: **if you rename or recreate a workflow, raise its
-`version_code_base` above the last code it published**. Local builds use the
-fallbacks in each `build.gradle.kts`, which are lower, so a local build won't
-install over a CI one.
+`appVersion` lives in `gradle.properties`; change it there for a new minor or
+major version (`2.2`, `3.0`). The build number is the `apps.yml` run number, so
+it only ever goes up, and so do version codes, which is what lets each build
+install over the last. (1000 is above every code released before the apps
+shared a version; the highest was 107.) **If `apps.yml` is ever renamed or
+recreated, its run numbers restart: raise the 1000 in it above the last
+release's code first.**
+
+Local builds use `<appVersion>.0` and code 1, so they never install over a
+release.
 
 ## Signing
 
@@ -71,8 +61,8 @@ The apps read their key two ways, as they did before the move:
   `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, `SIGNING_KEY_PASSWORD`, and use
   the debug key when they're not set.
 
-Pull requests build unsigned or debug-signed. Anything published (a tag, a
-manual release, `inbox-latest`) fails rather than ship without the real key.
+Pull requests build unsigned or debug-signed. A push to `main` fails rather
+than publish anything without the real keys.
 
 
 ### The keys
