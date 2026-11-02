@@ -23,11 +23,13 @@ shot() {
 # Emulators on CI sometimes show "<app> isn't responding" for their own
 # launcher or System UI while booting; that dialog would swallow our taps.
 dismiss_system_dialogs() {
-  if ui | grep -q "isn't responding"; then
+  local tries=0
+  while ui | grep -q "isn't responding" && [ $tries -lt 6 ]; do
     echo "Dismissing a system \"isn't responding\" dialog"
-    tap_raw "Wait" || adb shell input keyevent 4
-    sleep 1
-  fi
+    tap_raw "Close app" || adb shell input keyevent 4
+    tries=$((tries + 1))
+    sleep 2
+  done
 }
 
 # Taps the middle of the first element whose text (or description) is exactly $1.
@@ -50,6 +52,7 @@ tap_text() {
 
 # Fails unless the screen shows text containing $1.
 expect() {
+  dismiss_system_dialogs
   if ! ui | grep -qF "text=\"$1"; then
     echo "::error::Expected \"$1\" on screen at step $2"
     exit 1
