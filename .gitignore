@@ -1,0 +1,21 @@
+# Gradle and build output
+.gradle/
+build/
+local.properties
+.kotlin/
+
+# IDEs and OS
+.idea/
+*.iml
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Signing material never goes in git (see docs/releasing.md)
+*.jks
+*.keystore
+keystore.properties
+
+# Built APKs
+*.apk
