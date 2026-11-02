@@ -87,7 +87,7 @@ class ManagerViewModel(application: Application) : AndroidViewModel(application)
             source.cached()?.let { cached -> _state.update { it.copy(manifest = cached) }; rebuild() }
             refresh()
         }
-        viewModelScope.launch { Installer.results.collect(::onInstallResult) }
+        viewModelScope.launch { Installer.results.collect { onInstallResult(it) } }
     }
 
     /** Fetches the manifest again and re-reads what's installed. */

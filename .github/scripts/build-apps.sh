@@ -52,9 +52,10 @@ build() {
   pkg=$(sed -n "s/^package: name='\([^']*\)'.*/\1/p" <<< "$badging")
   code=$(sed -n "s/^package: .* versionCode='\([^']*\)'.*/\1/p" <<< "$badging")
   name=$(sed -n "s/^package: .* versionName='\([^']*\)'.*/\1/p" <<< "$badging")
-  minsdk=$(sed -n "s/^\(min\)\?sdkVersion:'\([0-9]*\)'.*/\2/p" <<< "$badging" | head -1)
+  minsdk=$(sed -n "s/^\(minSdkVersion\|sdkVersion\):'\([0-9]*\)'.*/\2/p" <<< "$badging" | head -1)
+  # "Signer #1 certificate SHA-256 digest: …" or, newer, "V2 Signer: certificate SHA-256 digest: …"
   cert=$("$apksigner" verify --print-certs "$out/$file" 2>/dev/null \
-    | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -1 || true)
+    | sed -n 's/^.*[Ss]igner.*certificate SHA-256 digest: *//p' | head -1 || true)
 
   local expected_code=${VERSION_CODE:-1} expected_name=${VERSION_NAME:-}
   if [ "$pkg" != "$package" ]; then
