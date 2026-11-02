@@ -1,11 +1,13 @@
 package gay.doughmination.manager.ui
 
+import gay.doughmination.design.*
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.text.format.DateUtils
 import android.text.format.Formatter
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +40,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -50,7 +51,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -143,7 +143,6 @@ fun ManagerApp(vm: ManagerViewModel) {
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
     ) { padding ->
@@ -269,8 +268,9 @@ private fun AppCard(
 ) {
     Card(
         onClick = { onSelect(row) },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Bg.copy(alpha = 0.72f)),
+        border = BorderStroke(1.dp, Line),
+        shape = SectionShape,
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -332,7 +332,7 @@ private fun StatusChip(row: AppRow) {
         AppStatus.UpToDate -> "Up to date" to Ok
         AppStatus.UpdateAvailable -> "Update available" to Accent
         AppStatus.InstalledNewer -> "Newer than the release" to Muted
-        AppStatus.SignatureMismatch -> "Different signing key" to Bad
+        AppStatus.SignatureMismatch -> "Different signing key" to Danger
         AppStatus.Incompatible -> "Needs Android ${sdkName(row.app.latest.minSdk)}" to Warn
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -385,7 +385,7 @@ private fun TaskLine(row: AppRow) {
         }
         Task.Verifying -> TaskText("Checking the SHA-256 checksum and signature…")
         Task.Installing -> TaskText("Waiting for Android to install it…")
-        is Task.Failed -> TaskText(task.message, Bad)
+        is Task.Failed -> TaskText(task.message, Danger)
         null -> Unit
     }
 }
@@ -408,77 +408,78 @@ private fun AppDetail(
 ) {
     val context = LocalContext.current
     val latest = row.app.latest
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            AppIcon(row)
-            Spacer(Modifier.width(14.dp))
-            Column(Modifier.weight(1f)) {
-                Text(row.app.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-                row.app.summary?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Muted) }
-            }
-        }
-        Spacer(Modifier.height(16.dp))
-        StatusChip(row)
-        explanation(row)?.let {
-            Spacer(Modifier.height(6.dp))
-            Text(it, style = MaterialTheme.typography.bodyMedium)
-        }
-        TaskLine(row)
-        Spacer(Modifier.height(16.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            val task = row.task
-            when {
-                task is Task.Downloading -> OutlinedButton(onClick = onCancel) { Text("Cancel download") }
-                task == Task.Verifying || task == Task.Installing -> Unit
-                Status.canInstall(row.status) -> Button(onClick = onInstall) {
-                    Text(if (row.status == AppStatus.UpdateAvailable) "Update to ${latest.versionName}" else "Install ${latest.versionName}")
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        GlassSection {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AppIcon(row)
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(row.app.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+                    row.app.summary?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = Muted) }
                 }
-                row.status == AppStatus.SignatureMismatch -> Button(onClick = onUninstall) { Text("Uninstall the old copy") }
             }
-            if (task is Task.Failed) TextButton(onClick = onDismiss) { Text("Dismiss") }
-            if (row.installed != null && !row.isSelf) OutlinedButton(onClick = onOpen) { Text("Open") }
-        }
-
-        Section("Versions")
-        Field("Installed", row.installed?.let { "${it.versionName ?: "?"} (${it.versionCode})" } ?: "Not installed")
-        Field("Latest", "${latest.versionName} (${latest.versionCode})")
-        latest.releasedAt?.let { Field("Built", relative(it)) }
-        Field("Download", Formatter.formatShortFileSize(context, latest.sizeBytes))
-        latest.minSdk?.let { Field("Needs", "Android ${sdkName(it)} or newer") }
-
-        Section("What's new")
-        Text(
-            latest.releaseNotes?.takeIf { it.isNotBlank() }?.let(::plainNotes) ?: "No notes for this build.",
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        latest.releaseUrl?.let { url ->
-            Spacer(Modifier.height(8.dp))
-            TextButton(onClick = { onLink(url) }, contentPadding = PaddingValues(0.dp)) {
-                Text("View the release")
-                Spacer(Modifier.width(6.dp))
-                Icon(Icons.AutoMirrored.Filled.OpenInNew, null, Modifier.size(16.dp))
+            StatusChip(row)
+            explanation(row)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            TaskLine(row)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val task = row.task
+                when {
+                    task is Task.Downloading -> OutlinedButton(onClick = onCancel) { Text("Cancel download") }
+                    task == Task.Verifying || task == Task.Installing -> Unit
+                    Status.canInstall(row.status) -> Button(onClick = onInstall) {
+                        Text(if (row.status == AppStatus.UpdateAvailable) "Update to ${latest.versionName}" else "Install ${latest.versionName}")
+                    }
+                    row.status == AppStatus.SignatureMismatch -> Button(onClick = onUninstall) { Text("Uninstall the old copy") }
+                }
+                if (task is Task.Failed) TextButton(onClick = onDismiss) { Text("Dismiss") }
+                if (row.installed != null && !row.isSelf) OutlinedButton(onClick = onOpen) { Text("Open") }
             }
         }
 
-        Section("Integrity")
-        Text(
-            "Every download is checked against this SHA-256 and the signing certificate before Android is asked to install it.",
-            style = MaterialTheme.typography.bodySmall,
-            color = Muted,
-        )
-        Spacer(Modifier.height(8.dp))
-        SelectionContainer {
-            Column {
-                Field("Package", row.app.packageName, mono = true)
-                Field("SHA-256", latest.sha256.lowercase(), mono = true)
-                row.app.signingCertSha256.forEach { Field("Signing key", it, mono = true) }
+        GlassSection("Versions") {
+            Field("Installed", row.installed?.let { "${it.versionName ?: "?"} (${it.versionCode})" } ?: "Not installed")
+            Field("Latest", "${latest.versionName} (${latest.versionCode})")
+            latest.releasedAt?.let { Field("Built", relative(it)) }
+            Field("Download", Formatter.formatShortFileSize(context, latest.sizeBytes))
+            latest.minSdk?.let { Field("Needs", "Android ${sdkName(it)} or newer") }
+        }
+
+        GlassSection("What's new") {
+            Text(
+                latest.releaseNotes?.takeIf { it.isNotBlank() }?.let(::plainNotes) ?: "No notes for this build.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            latest.releaseUrl?.let { url ->
+                TextButton(onClick = { onLink(url) }, contentPadding = PaddingValues(0.dp)) {
+                    Text("View the release")
+                    Spacer(Modifier.width(6.dp))
+                    Icon(Icons.AutoMirrored.Filled.OpenInNew, null, Modifier.size(16.dp))
+                }
             }
         }
-        Spacer(Modifier.height(24.dp))
+
+        GlassSection("Integrity") {
+            Text(
+                "Every download is checked against this SHA-256 and the signing certificate before Android is asked to install it.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Muted,
+            )
+            SelectionContainer {
+                Column {
+                    Field("Package", row.app.packageName, mono = true)
+                    Field("SHA-256", latest.sha256.lowercase(), mono = true)
+                    row.app.signingCertSha256.forEach { Field("Signing key", it, mono = true) }
+                }
+            }
+        }
         Text(
             "Manager ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
             style = MaterialTheme.typography.labelSmall,
             color = Muted,
+            modifier = Modifier.padding(top = 8.dp),
         )
     }
 }
@@ -490,15 +491,6 @@ private fun explanation(row: AppRow): String? = when (row.status) {
     AppStatus.Incompatible -> "This build needs Android ${sdkName(row.app.latest.minSdk)} or newer."
     AppStatus.InstalledNewer -> "The installed build is newer than the published one, so there's nothing to update."
     else -> null
-}
-
-@Composable
-private fun Section(title: String) {
-    Spacer(Modifier.height(24.dp))
-    Text(title, style = MaterialTheme.typography.titleSmall, color = Accent)
-    Spacer(Modifier.height(4.dp))
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-    Spacer(Modifier.height(8.dp))
 }
 
 @Composable

@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -80,7 +81,7 @@ fun RelationshipsScreen(vm: SystemViewModel) {
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            PageHead("// system.relationships", "Relationship Map", "Who is dating who across the system")
+            PageHead("Relationships", "Relationship Map", "Who is dating who across the system")
 
             if (couples.isEmpty()) {
                 Panel { Text(if (vm.loading) "Loading…" else "No relationships to show yet", color = Muted) }

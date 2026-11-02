@@ -20,14 +20,16 @@ Plural is the System app; see [plural/README.md](plural/README.md).
 settings.gradle.kts       every app module is included here
 build.gradle.kts          plugin versions (apply false)
 gradle/libs.versions.toml one version catalog: SDK levels, plugins, libraries
+design/                   the shared look (Inbox's theme): palette, IBM Plex, backdrop, glass cards
 <app>/app/                one Android application module per app
 docs/releasing.md         tags, version codes, signing, CI secrets
 docs/manifest.md          the Doughmination Manager's manifest format
 .github/workflows/apps.yml one workflow: builds, signs and releases every app
 ```
 
-The apps share the build and the catalog, never each other's code: no app
-depends on another, and each keeps its own namespace, application ID,
+The apps share the build, the catalog and the look (`:design`, which every
+app's theme comes from, so they can't drift apart), never each other's code:
+no app depends on another, and each keeps its own namespace, application ID,
 resources and signing key.
 
 ## Building

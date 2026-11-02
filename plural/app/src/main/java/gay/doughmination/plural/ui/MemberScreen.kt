@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,7 +55,7 @@ fun MemberScreen(vm: SystemViewModel, id: String) {
         if (member == null) {
             Box(Modifier.fillMaxSize().padding(16.dp)) {
                 Panel {
-                    Text("Error 404", style = Eyebrow)
+                    Text("ERROR 404", style = Eyebrow)
                     Text("Member not found", style = MaterialTheme.typography.headlineSmall)
                     Text("This member could not be found in the Doughmination System.", color = Muted)
                 }

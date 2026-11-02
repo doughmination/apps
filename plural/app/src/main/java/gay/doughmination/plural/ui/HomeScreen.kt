@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -120,7 +121,7 @@ fun HomeScreen(vm: SystemViewModel) {
                 }
             }
 
-            item(span = full) { PageHead("// system.members", "System Members") }
+            item(span = full) { PageHead("Doughmination System", "System Members") }
 
             vm.mental?.let { state -> item(span = full) { MentalBanner(state) } }
 

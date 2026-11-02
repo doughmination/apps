@@ -2,11 +2,9 @@ package gay.doughmination.plural
 
 import android.content.Intent
 import android.os.Bundle
-import android.graphics.Color
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import gay.doughmination.design.enableDoughminationEdgeToEdge
 import androidx.activity.viewModels
 import gay.doughmination.plural.ui.AppRoot
 import gay.doughmination.plural.ui.SystemTheme
@@ -19,11 +17,7 @@ class MainActivity : ComponentActivity() {
     private var awaitingLogin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // The app is always dark, so the system bars need light icons whatever the phone's theme.
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-        )
+        enableDoughminationEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent { SystemTheme { AppRoot(vm) } }
         // A recreated activity (rotation) has already handled its launch intent.

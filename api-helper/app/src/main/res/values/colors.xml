@@ -1,19 +1,5 @@
 <resources>
-    <!-- doughmination.gay tokens, mirrored from web's theme.css (and pastebin/reviewer's app extras). -->
-    <color name="bg">#0b0a0d</color>
-    <color name="raised">#09ffffff</color>      <!-- rgb(255 255 255 / 3.5%) -->
-    <color name="line">#17ffffff</color>        <!-- rgb(255 255 255 / 9%) -->
-    <color name="field">#40000000</color>       <!-- rgb(0 0 0 / 25%) -->
-    <color name="text">#ece9ef</color>
-    <color name="lede">#cfc9d6</color>
-    <color name="muted">#a49eab</color>
-    <color name="accent">#eb459e</color>
-    <color name="accent_dim">#24eb459e</color>  <!-- rgb(235 69 158 / 14%) -->
-    <color name="on_accent">#1a0611</color>
-
-    <color name="ok">#7fd98b</color>
-    <color name="warn">#f2c46d</color>
-    <color name="bad">#ff8a9a</color>
-
+    <!-- The notification's accent: the shared Doughmination pink. -->
+    <color name="accent">#EB459E</color>
     <color name="ic_launcher_background">#0b0a0d</color>
 </resources>

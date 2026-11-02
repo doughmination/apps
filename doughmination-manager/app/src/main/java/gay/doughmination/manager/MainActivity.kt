@@ -1,27 +1,32 @@
 package gay.doughmination.manager
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import gay.doughmination.design.Backdrop
+import gay.doughmination.design.DoughminationTheme
+import gay.doughmination.design.enableDoughminationEdgeToEdge
 import gay.doughmination.manager.ui.ManagerApp
-import gay.doughmination.manager.ui.ManagerTheme
 import gay.doughmination.manager.ui.ManagerViewModel
 
 class MainActivity : ComponentActivity() {
     private val vm: ManagerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // The app is always dark, so the system bars get light icons.
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-        )
+        enableDoughminationEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContent { ManagerTheme { ManagerApp(vm) } }
+        setContent {
+            DoughminationTheme {
+                Box(Modifier.fillMaxSize()) {
+                    Backdrop()
+                    ManagerApp(vm)
+                }
+            }
+        }
     }
 
     override fun onResume() {

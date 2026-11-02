@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="doughmination_background">#0B0A0D</color>
+
+    <!-- Every app's window theme: Compose draws everything, this only colours
+         the window before it does, so launching never flashes white. -->
+    <style name="Theme.Doughmination" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/doughmination_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>
