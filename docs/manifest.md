@@ -1,86 +1,83 @@
-# Doughmination Manager manifest (proposed, v1)
+# Doughmination Manager manifest (v1)
 
-**Status: proposal.** Nothing serves this yet and the Manager doesn't read it
-yet. Where it's hosted, and what builds it, is up to the existing backend; this
-only fixes the shape so the app and whatever produces it agree.
+Doughmination Manager reads one JSON document:
 
-The Manager fetches one JSON document from a fixed URL. Publishing a new
-version of any app means updating that document; the Manager itself never needs
-rebuilding for it.
+https://github.com/doughmination/apps/releases/latest/download/manifest.json
+
+CI writes it (`.github/scripts/make-manifest.sh`) on every push to `main` and
+attaches it to the rolling `latest` release, last, after the APKs. Publishing a
+new build of any app never needs a new Manager.
 
 ```json
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-02T12:00:00Z",
+  "generatedAt": "2026-11-02T20:00:00Z",
+  "commit": "0b6f8154…",
   "apps": [
     {
       "id": "inbox",
       "packageName": "gay.doughmination.mail",
       "name": "Inbox",
-      "summary": "Mail for every doughmination domain.",
-      "iconUrl": "https://…/inbox.png",
-      "signingCertSha256": ["AB:CD:…"],
+      "summary": "Mail for every Doughmination domain.",
+      "signingCertSha256": ["79:7D:66:…"],
       "latest": {
-        "versionCode": 112,
-        "versionName": "1.2.0",
-        "apkUrl": "https://…/inbox-1.2.0.apk",
+        "versionCode": 1012,
+        "versionName": "2.1.12",
+        "apkUrl": "https://github.com/doughmination/apps/releases/latest/download/inbox.apk",
         "sha256": "…",
         "sizeBytes": 8123456,
         "minSdk": 26,
-        "releasedAt": "2026-11-02T12:00:00Z",
-        "releaseNotes": "Markdown.",
-        "releaseUrl": "https://github.com/doughmination/apps/releases/tag/inbox-v1.2.0"
+        "releasedAt": "2026-11-02T20:00:00Z",
+        "releaseNotes": "- Commit subjects since the previous release that touched email/",
+        "releaseUrl": "https://github.com/doughmination/apps/releases/tag/latest"
       }
     }
   ]
 }
 ```
 
-## Fields
+## Where each value comes from
 
-| Field | Required | Notes |
-|---|---|---|
-| `schemaVersion` | yes | `1`. The Manager refuses a major version it doesn't know. |
-| `apps[].id` | yes | Stable, URL-safe. Never reused. |
-| `apps[].packageName` | yes | The applicationId; how the Manager finds the installed copy. |
-| `apps[].name`, `summary`, `iconUrl` | name yes | For the list. |
-| `apps[].signingCertSha256` | yes | SHA-256 of the signing certificate(s), as `apksigner verify --print-certs` prints them. The Manager won't install an APK signed by anything else. |
-| `latest.versionCode` | yes | Compared with the installed `longVersionCode`. |
-| `latest.versionName` | yes | Shown to people. |
-| `latest.apkUrl` | yes | HTTPS. |
-| `latest.sha256`, `sizeBytes` | yes | Checked after download, before installing. |
-| `latest.minSdk` | no | Lets the Manager hide apps the phone can't run. |
-| `latest.releasedAt`, `releaseNotes`, `releaseUrl` | no | Shown on the app's page. |
+| Field | Source |
+|---|---|
+| `packageName`, `versionCode`, `versionName`, `minSdk` | Read from the built APK with `aapt2 dump badging`. The build fails if they differ from the version CI meant to build. |
+| `sha256`, `sizeBytes` | The APK file as uploaded. |
+| `signingCertSha256` | Pinned in `.github/apps.json`. On `main` the build fails if the APK's certificate (from `apksigner`) isn't that one. |
+| `id`, `name`, `summary` | `.github/apps.json`. |
+| `releaseNotes` | `git log` of the app's directory since its own previous release. |
+| `sourceHash` | Fingerprint of the app's directory plus the shared build files. When it matches the published one, CI keeps the published entry and APK instead (docs/releasing.md). |
+| `sourceCommit` | The commit the app was last built from; its next release notes start there. |
+| `commit` | The commit this manifest was written from. |
 
-The Manager lists itself in `apps` like any other app, which is how it updates
-itself.
+CI also refuses to publish if a changed app's `versionCode` would not be
+higher than the one in the manifest already published, so a re-run of an old build can
+never roll anything back.
 
-## Where the values come from
+## What the Manager does with it
 
-Every release CI publishes carries `<artifact>-<version>.json` beside the APK
-(see [releasing.md](releasing.md)):
+- Refuses any `schemaVersion` other than 1, and drops entries without an HTTPS
+  URL, a 64-hex `sha256`, a size, or a certificate.
+- Compares `latest.versionCode` with the installed `longVersionCode`: lower is
+  an update, equal is up to date, higher is "newer than the release" (a local
+  build); nothing is ever downgraded.
+- Shows "different signing key" (with an uninstall button) when the installed
+  copy's certificate isn't in `signingCertSha256`: Android won't update it in
+  place.
+- After downloading (resumable; files are named by version code), checks size
+  and SHA-256, then reads the APK with PackageManager and checks its package
+  name, version code and certificate against the manifest. Only then does it
+  hand it to PackageInstaller, where Android asks the person to confirm.
+- Keeps the last good manifest, so the list still shows offline.
 
-```json
-{
-  "packageName": "gay.doughmination.mail",
-  "versionCode": 112,
-  "versionName": "1.2.0",
-  "file": "inbox-1.2.0.apk",
-  "sha256": "…",
-  "sizeBytes": 8123456,
-  "commit": "…"
-}
-```
+The Manager lists itself, which is how it updates itself.
 
-That covers `latest` apart from the URLs and notes. The rest (`name`, `summary`,
-`iconUrl`, `signingCertSha256`) changes rarely and can sit in whatever
-generates the manifest.
+Adding an app: add it to `build-apps.sh`, to `.github/apps.json`, and to the
+`<queries>` list in the Manager's `AndroidManifest.xml` (Android 11+ hides
+other packages otherwise).
 
-## Open questions
+## Not in v1
 
-- Where the manifest is served from, and whether APKs stay on GitHub Releases.
-- Whether the manifest should be signed (e.g. a detached signature checked
-  against a key built into the Manager). The per-app certificate check already
-  stops a tampered manifest from installing a foreign APK, but not from
-  offering an old version.
-- Release channels (beta) are left out of v1.
+- A signature over the manifest. The certificate check already stops a
+  tampered manifest from installing a foreign APK, and version codes never go
+  down, but a tampered manifest could still withhold an update.
+- Release channels (beta).

@@ -10,8 +10,9 @@ own repositories (the mail server is [doughmination/email](https://github.com/do
 | Doughmination Manager | [`doughmination-manager/`](doughmination-manager/) | `:doughmination-manager:app` | `gay.doughmination.manager` |
 | System (Plural) | [`plural/`](plural/) | `:plural:app` | `gay.doughmination.plural` |
 
-Doughmination Manager is a placeholder for now: it builds and runs, and
-nothing else. Plural is the System app; see [plural/README.md](plural/README.md).
+Doughmination Manager installs and updates the others (and itself) from the
+rolling release; see [doughmination-manager/README.md](doughmination-manager/README.md).
+Plural is the System app; see [plural/README.md](plural/README.md).
 
 ## Layout
 

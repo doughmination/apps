@@ -1,20 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Installs go through PackageInstaller; Android still asks the person to
+         allow this app as an install source, and to confirm every install. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Only to open the system's own uninstall prompt, for a copy signed with
+         a different key that can't be updated in place. -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <!-- Package visibility (Android 11+): the apps the Manager looks after.
+         Add a new app's package here when it joins the manifest. -->
+    <queries>
+        <package android:name="gay.doughmination.plural" />
+        <package android:name="gay.doughmination.mail" />
+        <package android:name="uk.doughmination.devicereporter" />
+        <package android:name="gay.doughmination.manager" />
+    </queries>
+
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- PackageInstaller reports each install's progress here. -->
+        <receiver
+            android:name=".install.InstallReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

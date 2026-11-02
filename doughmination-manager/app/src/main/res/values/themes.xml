@@ -1,5 +1,7 @@
 <resources>
     <!-- Compose draws everything; this only covers the window before it does. -->
-    <style name="Theme.App" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.App" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/ic_launcher_background</item>
+    </style>
     <color name="ic_launcher_background">#1E1B2E</color>
 </resources>
