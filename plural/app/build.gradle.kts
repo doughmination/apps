@@ -2,7 +2,11 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
+
+// The Doughmination API the app talks to; -PapiUrl=https://... points a build elsewhere.
+val apiUrl = (findProperty("apiUrl") as String?) ?: "https://doughmination.uk/v2"
 
 android {
     namespace = "gay.doughmination.plural"
@@ -17,6 +21,9 @@ android {
         // CI sets these (see docs/releasing.md); local builds use the fallbacks.
         versionCode = System.getenv("VERSION_CODE")?.toInt() ?: 1
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
+        buildConfigField("String", "API_URL", "\"$apiUrl\"")
+        // Member pages on the website, for sharing.
+        buildConfigField("String", "SITE_URL", "\"https://doughmination.co.uk\"")
     }
 
     // Same convention as Device Reporter: CI passes the key through SIGNING_*
@@ -42,6 +49,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -57,10 +65,19 @@ android {
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.browser)
+
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.android)
 }

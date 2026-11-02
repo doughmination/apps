@@ -1,41 +1,59 @@
 package gay.doughmination.plural
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.activity.viewModels
+import gay.doughmination.plural.ui.AppRoot
+import gay.doughmination.plural.ui.SystemTheme
+import gay.doughmination.plural.ui.SystemViewModel
 
-/** Placeholder screen until the app's real features are designed. */
 class MainActivity : ComponentActivity() {
+    private val vm: SystemViewModel by viewModels()
+
+    /** A sign-in tab is open; coming back without a code means it was closed. */
+    private var awaitingLogin = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
-                Placeholder()
+        super.onCreate(savedInstanceState)
+        setContent { SystemTheme { AppRoot(vm) } }
+        // A recreated activity (rotation) has already handled its launch intent.
+        if (savedInstanceState == null) handle(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handle(intent)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        awaitingLogin = vm.signingIn
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Back from the browser tab without a redirect: the tab was closed.
+        if (awaitingLogin && vm.signingIn && intent?.data == null) vm.loginAbandoned()
+        awaitingLogin = false
+    }
+
+    private fun handle(intent: Intent?) {
+        val data = intent?.data ?: return
+        // The end of sign-in: gay.doughmination.plural://auth?code=… (or ?error=…)
+        if (data.scheme == "gay.doughmination.plural" && data.host == "auth") {
+            awaitingLogin = false
+            val code = data.getQueryParameter("code")
+            val error = data.getQueryParameter("error")
+            when {
+                code != null -> vm.finishLogin(code)
+                error != null -> vm.loginFailed(error)
             }
         }
-    }
-}
-
-@Composable
-private fun Placeholder() {
-    Scaffold { padding ->
-        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
-        }
+        // Handled once: a rotation or a later resume mustn't replay it.
+        this.intent = Intent(this.intent).setData(null)
     }
 }

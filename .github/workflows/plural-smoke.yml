@@ -1,0 +1,70 @@
+# Builds Plural's signed release APK and runs it on an Android emulator:
+# install, launch, walk the tabs, screenshot each step, fail on a crash.
+# Screenshots and the APK are uploaded with the run.
+name: Plural smoke test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ["plural/**", ".github/workflows/plural-smoke.yml", ".github/scripts/plural-smoke.sh"]
+
+jobs:
+  emulator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      HAS_SIGNING_KEY: ${{ secrets.PLURAL_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Restore signing key
+        if: env.HAS_SIGNING_KEY == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.PLURAL_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.PLURAL_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.PLURAL_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.PLURAL_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.p12"
+          {
+            echo "SIGNING_STORE_FILE=$RUNNER_TEMP/release.p12"
+            echo "SIGNING_STORE_PASSWORD=$STORE_PASSWORD"
+            echo "SIGNING_KEY_ALIAS=$KEY_ALIAS"
+            echo "SIGNING_KEY_PASSWORD=$KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Build
+        run: ./gradlew :plural:app:assembleRelease --console=plain
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run on an emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/plural-smoke.sh plural/app/build/outputs/apk/release/app-release.apk smoke
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plural-smoke
+          path: |
+            smoke/
+            plural/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: warn

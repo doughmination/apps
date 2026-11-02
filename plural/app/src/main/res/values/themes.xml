@@ -1,5 +1,11 @@
 <resources>
-    <!-- Compose draws everything; this only covers the window before it does. -->
-    <style name="Theme.App" parent="android:Theme.Material.Light.NoActionBar" />
-    <color name="ic_launcher_background">#1E1B2E</color>
+    <!-- Compose draws everything; this only covers the window before it does,
+         in the site's dark background so launching doesn't flash white. -->
+    <style name="Theme.App" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+    <color name="bg">#0B0A0D</color>
+    <color name="ic_launcher_background">#0B0A0D</color>
 </resources>
