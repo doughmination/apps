@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 class ApiException(message: String, val status: Int) : Exception(message)
 
 /**
- * The Doughmination API's plural system routes (/v2/plural/*). Reads are
+ * The Doughmination API's plural system routes (/v2/plural/…). Reads are
  * public, exactly as the website makes them; writes carry the signed-in
  * user's token. Bodies come back bare, and errors as { detail }.
  */
