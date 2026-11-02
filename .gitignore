@@ -16,6 +16,8 @@ captures/
 *.jks
 *.keystore
 keystore.properties
+*.p12
+*.pem
 
 # Built APKs
 *.apk

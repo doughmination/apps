@@ -141,7 +141,7 @@ jobs:
           MODE: ${{ inputs.signing }}
           PROPS_DIR: ${{ inputs.properties_dir }}
         run: |
-          store="$RUNNER_TEMP/release.jks"
+          store="$RUNNER_TEMP/release.p12"
           echo "$KEYSTORE_BASE64" | base64 -d > "$store"
           if [ "$MODE" = properties ]; then
             umask 077
@@ -190,6 +190,14 @@ jobs:
           cat "$meta"
           echo "APK=$apk" >> "$GITHUB_ENV"
           echo "META=$meta" >> "$GITHUB_ENV"
+
+      # Fails if the APK isn't validly signed, and prints the certificate so it
+      # can be checked against docs/releasing.md.
+      - name: Verify signature
+        if: env.HAS_SIGNING_KEY == 'true'
+        run: |
+          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$apksigner" verify --print-certs "$APK" | grep -E "certificate (DN|SHA-256)"
 
       - uses: actions/upload-artifact@v4
         with:
