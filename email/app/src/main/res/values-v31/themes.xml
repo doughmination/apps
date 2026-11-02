@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ can animate the splash icon; older versions show it still. -->
+    <style name="Theme.Inbox.Starting" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_animated</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/icon_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.Inbox</item>
+    </style>
+</resources>
