@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -48,6 +49,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -79,7 +81,7 @@ fun RelationshipsScreen(vm: SystemViewModel) {
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            PageHead("// system.relationships", "Relationship Map", "Who is dating who across the system")
+            PageHead("Relationships", "Relationship Map", "Who is dating who across the system")
 
             if (couples.isEmpty()) {
                 Panel { Text(if (vm.loading) "Loading…" else "No relationships to show yet", color = Muted) }
@@ -121,7 +123,15 @@ private fun Who(member: Member, modifier: Modifier, open: (Member) -> Unit, end:
         horizontalArrangement = Arrangement.spacedBy(8.dp, if (end) Alignment.End else Alignment.Start),
     ) {
         if (!end) Avatar(member.avatarUrl, 32.dp, ring = memberColour(member.color))
-        Text(member.shownName, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f, fill = false))
+        // Two lines: similar long names (Serial Designation N / J) must stay tellable apart.
+        Text(
+            member.shownName,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = if (end) TextAlign.End else TextAlign.Start,
+            modifier = Modifier.weight(1f, fill = false),
+        )
         if (end) Avatar(member.avatarUrl, 32.dp, ring = memberColour(member.color))
     }
 }

@@ -1,5 +1,6 @@
 package gay.doughmination.mail.ui
 
+import gay.doughmination.design.*
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -193,30 +194,11 @@ fun SettingsScreen(vm: MailViewModel) {
     }
 }
 
-private val sectionShape = RoundedCornerShape(16.dp)
 
-/** A card like the web's settings sections: dark glass, a hairline border, an eyebrow heading. */
+/** A settings section: the shared glass card. */
 @Composable
-private fun Section(title: String, icon: ImageVector? = null, content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(sectionShape)
-            .background(Bg.copy(alpha = 0.72f))
-            .border(1.dp, Line, sectionShape)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (icon != null) {
-                Icon(icon, null, Modifier.size(16.dp), tint = Accent)
-                Spacer(Modifier.width(6.dp))
-            }
-            Text(title.uppercase(), style = Eyebrow)
-        }
-        content()
-    }
-}
+private fun Section(title: String, icon: ImageVector? = null, content: @Composable ColumnScope.() -> Unit) =
+    GlassSection(title, icon = icon, content = content)
 
 /** A dropdown of the swipe actions, as an outlined field. */
 @OptIn(ExperimentalMaterial3Api::class)

@@ -6,7 +6,7 @@ import android.os.SystemClock
 import android.view.animation.AccelerateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import gay.doughmination.design.enableDoughminationEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import gay.doughmination.mail.ui.AppRoot
@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     .start()
             }
         }
-        enableEdgeToEdge()
+        enableDoughminationEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent { InboxTheme { AppRoot(vm) } }
         // A recreated activity (rotation) has already handled its launch intent.

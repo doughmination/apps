@@ -1,0 +1,31 @@
+{
+  "_comment": "What the Manager shows for each app, and the certificate each published APK must be signed with (docs/releasing.md). CI fails rather than publish an APK whose certificate isn't the one pinned here. Keyed by the APK's file name in the release.",
+  "system.apk": {
+    "id": "system",
+    "name": "System",
+    "summary": "The plural system: members, fronting and relationships.",
+    "dir": "plural",
+    "signingCertSha256": "F1:0D:90:FE:C9:0C:97:18:C0:06:8B:70:5A:55:92:62:05:DF:11:74:95:62:A2:7D:30:B5:16:70:40:3E:1D:C1"
+  },
+  "inbox.apk": {
+    "id": "inbox",
+    "name": "Inbox",
+    "summary": "Mail for every Doughmination domain.",
+    "dir": "email",
+    "signingCertSha256": "79:7D:66:1F:F5:EE:00:FD:DB:E3:E0:7F:FF:07:C5:EF:AC:C3:50:8F:18:65:0F:60:F5:A6:A6:4B:95:30:A8:DD"
+  },
+  "device-reporter.apk": {
+    "id": "device-reporter",
+    "name": "Device Reporter",
+    "summary": "Reports this phone's battery and state to the Doughmination API.",
+    "dir": "api-helper",
+    "signingCertSha256": "D1:D0:FB:74:BA:38:5E:69:55:BF:58:97:FD:E7:18:4F:4F:2F:1B:91:FD:0E:FA:2D:9E:A8:FF:C0:59:B8:CF:D5"
+  },
+  "doughmination-manager.apk": {
+    "id": "manager",
+    "name": "Doughmination Manager",
+    "summary": "Installs and updates the Doughmination apps.",
+    "dir": "doughmination-manager",
+    "signingCertSha256": "22:8D:A3:BC:CF:8B:ED:60:21:B8:E6:E0:17:C2:FE:62:F1:EC:52:9C:8C:D4:2C:8D:41:A1:35:FA:62:7B:E8:AA"
+  }
+}

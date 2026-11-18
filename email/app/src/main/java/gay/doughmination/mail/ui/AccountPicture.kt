@@ -1,5 +1,6 @@
 package gay.doughmination.mail.ui
 
+import gay.doughmination.design.*
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

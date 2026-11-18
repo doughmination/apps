@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import gay.doughmination.design.enableDoughminationEdgeToEdge
 import androidx.activity.viewModels
 import gay.doughmination.plural.ui.AppRoot
 import gay.doughmination.plural.ui.SystemTheme
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
     private var awaitingLogin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        enableDoughminationEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent { SystemTheme { AppRoot(vm) } }
         // A recreated activity (rotation) has already handled its launch intent.

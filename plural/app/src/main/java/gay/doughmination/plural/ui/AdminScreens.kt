@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -269,7 +270,7 @@ fun StatusScreen(vm: SystemViewModel) {
                         Text(if (vm.busy) "Updating..." else "Update status")
                     }
                     if (chosen.status != null) {
-                        OutlinedButton(onClick = { confirmClear = true }, enabled = !vm.busy) { Text("Clear", color = Bad) }
+                        OutlinedButton(onClick = { confirmClear = true }, enabled = !vm.busy) { Text("Clear", color = Danger) }
                     }
                 }
                 chosen.status?.let { status ->
@@ -432,7 +433,7 @@ fun ManageRelationshipsScreen(vm: SystemViewModel) {
                         Text("${label(edge.members[0])} ${if (edge.type == "crush") "→" else "&"} ${label(edge.members[1])}")
                         Text(edge.type + (edge.since?.let { " · since $it" } ?: ""), color = Muted, fontSize = 12.sp)
                     }
-                    IconButton(onClick = { removing = edge }, enabled = !vm.busy) { Icon(Icons.Outlined.Delete, "Remove", tint = Bad) }
+                    IconButton(onClick = { removing = edge }, enabled = !vm.busy) { Icon(Icons.Outlined.Delete, "Remove", tint = Danger) }
                 }
             }
         }
@@ -483,7 +484,7 @@ fun UsersScreen(vm: SystemViewModel) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = { editingId = user.id }) { Text("Edit") }
                         if (user.id != vm.user?.id) {
-                            OutlinedButton(onClick = { deleting = user }, enabled = !vm.busy) { Text("Delete", color = Bad) }
+                            OutlinedButton(onClick = { deleting = user }, enabled = !vm.busy) { Text("Delete", color = Danger) }
                         }
                     }
                 }

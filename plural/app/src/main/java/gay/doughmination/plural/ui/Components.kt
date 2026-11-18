@@ -2,6 +2,7 @@
 
 package gay.doughmination.plural.ui
 
+import gay.doughmination.design.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -67,11 +68,11 @@ fun Panel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> 
     )
 }
 
-/** A page's heading, as the website writes them: "// system.members" over a title. */
+/** A page's heading: an eyebrow over a title, as Inbox and the websites do it. */
 @Composable
 fun PageHead(eyebrow: String, title: String, subtitle: String? = null) {
     Column(Modifier.padding(bottom = 4.dp)) {
-        Text(eyebrow, style = Eyebrow)
+        Text(eyebrow.uppercase(), style = Eyebrow)
         Text(title, style = MaterialTheme.typography.headlineMedium)
         subtitle?.let { Text(it, color = Muted, style = MaterialTheme.typography.bodyMedium) }
     }
@@ -179,7 +180,7 @@ fun PrideSwatch(label: String, modifier: Modifier = Modifier) {
 /** The colour the website gives a mental-state level: ok, warn or bad. */
 fun mentalColour(level: String): Color = when (MentalLevel.of(level)?.severity) {
     1 -> Warn
-    2 -> Bad
+    2 -> Danger
     else -> Ok
 }
 
@@ -210,12 +211,12 @@ fun MentalBanner(state: MentalState, modifier: Modifier = Modifier) {
         Icon(mentalIcon(state.level), contentDescription = null, tint = colour, modifier = Modifier.size(30.dp))
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row {
-                Text("status: ", color = Muted, fontFamily = Eyebrow.fontFamily, fontSize = 14.sp)
-                Text("[ $label ]", color = colour, fontWeight = FontWeight.SemiBold, fontFamily = Eyebrow.fontFamily, fontSize = 14.sp)
+                Text("status: ", color = Muted, fontFamily = Mono, fontSize = 14.sp)
+                Text("[ $label ]", color = colour, fontWeight = FontWeight.SemiBold, fontFamily = Mono, fontSize = 14.sp)
             }
             state.notes?.ifBlank { null }?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
             formatTime(state.updatedAt)?.let {
-                Text("last_updated: $it", color = Muted, fontSize = 12.sp, fontFamily = Eyebrow.fontFamily)
+                Text("last_updated: $it", color = Muted, fontSize = 12.sp, fontFamily = Mono)
             }
         }
     }
@@ -224,10 +225,10 @@ fun MentalBanner(state: MentalState, modifier: Modifier = Modifier) {
 /** A plain notice line, like the website's .notice. */
 @Composable
 fun Notice(text: String, error: Boolean = false, modifier: Modifier = Modifier) {
-    val colour = if (error) Bad else Muted
+    val colour = if (error) Danger else Muted
     Text(
         text,
-        color = if (error) Bad else TextColour,
+        color = if (error) Danger else TextColour,
         style = MaterialTheme.typography.bodyMedium,
         modifier = modifier
             .fillMaxWidth()
